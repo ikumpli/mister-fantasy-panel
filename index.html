@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mister Fantasy · Panel sin hosting</title>
+  <meta name="description" content="Panel para gestionar puntos, sprints, invierno y pagos de Mister Fantasy, sin hosting." />
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel to allow JSX in the browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Framer Motion UMD -->
+  <script src="https://unpkg.com/framer-motion/dist/framer-motion.umd.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    html { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
+    .input {
+      padding: 0.375rem 0.5rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgb(203 213 225);
+      background: white;
+      outline: none;
+    }
+    .input:focus { box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.45); }
+    .shadow-soft { box-shadow: 0 8px 24px rgba(2,6,23,0.06); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useEffect, useMemo, useState } = React;
+    const { motion, AnimatePresence } = window.framerMotion;
+
+    // Helpers
+    function uuid() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'id-' + Math.random().toString(36).slice(2) + Date.now();
+    }
+
+    const defaultPlayers = [
+      { id: uuid(), name: "Jugador 1" },
+      { id: uuid(), name: "Jugador 2" },
+      { id: uuid(), name: "Jugador 3" },
+    ];
+
+    const defaultConfig = {
+      seasonJornadas: 38,
+      sprintSize: 5,
+      sprintStopAt: 35,
+      winterEnd: 19,
+      payouts: {
+        final: { 1: 55, 2: 30, 3: 0, 4: -10, 5: -10, 6: -15, 7: -15, 8: -15, 9: -20, 10: -20, 11: -20 },
+        winter: { 1: 0, 2: 0, 3: 0, 4: -5, 5: -5, 6: -5, 7: -5, 8: -10, 9: -10, 10: -10, 11: -10 },
+        sprintBottomN: 4,
+        sprintPay: 5,
+      },
+    };
+
+    const lsKey = "mister-fantasy-state-v1";
+
+    const blankPoints = (players, jornadas) => {
+      const data = {};
+      players.forEach((p) => {
+        data[p.id] = Array.from({ length: jornadas }, () => "");
+      });
+      return data;
+    };
+
+    function sum(arr) {
+      return arr.reduce((a, b) => a + (Number(b) || 0), 0);
+    }
+
+    function segmentIndices(total, size, maxIncl) {
+      const out = [];
+      let start = 1;
+      while (start <= Math.min(total, maxIncl)) {
+        const end = Math.min(start + size - 1, maxIncl);
+        out.push([start, end]);
+        start = end + 1;
+      }
+      return out;
+    }
+
+    function rankEntries(entries) {
+      const sorted = [...entries].sort((a, b) => b.value - a.value);
+      let rank = 1;
+      const results = [];
+      for (let i = 0; i < sorted.length; i++) {
+        if (i > 0 && sorted[i].value === sorted[i - 1].value) {
+          // same rank
+        } else {
+          rank = i + 1;
+        }
+        results.push({ ...sorted[i], rank });
+      }
+      return results;
+    }
+
+    function currency(n) {
+      const sign = n < 0 ? "-" : "";
+      const val = Math.abs(n).toFixed(2).replace(".00", "");
+      return sign + val + "€";
+    }
+
+    function App() {
+      const [players, setPlayers] = useState(defaultPlayers);
+      const [config, setConfig] = useState(defaultConfig);
+      const [points, setPoints] = useState(() => blankPoints(defaultPlayers, defaultConfig.seasonJornadas));
+      const [activeTab, setActiveTab] = useState("datos");
+      const [toast, setToast] = useState(null);
+
+      // Load from localStorage
+      useEffect(() => {
+        const raw = localStorage.getItem(lsKey);
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed.players) setPlayers(parsed.players);
+            if (parsed.config) setConfig(parsed.config);
+            if (parsed.points) setPoints(parsed.points);
+          } catch {}
+        }
+      }, []);
+
+      // Save to localStorage
+      useEffect(() => {
+        localStorage.setItem(lsKey, JSON.stringify({ players, config, points }));
+      }, [players, config, points]);
+
+      // Ensure arrays align with players and jornadas
+      useEffect(() => {
+        const pcopy = { ...points };
+        players.forEach((p) => {
+          if (!pcopy[p.id]) pcopy[p.id] = Array.from({ length: config.seasonJornadas }, () => "");
+          else if (pcopy[p.id].length !== config.seasonJornadas) {
+            const arr = Array.from({ length: config.seasonJornadas }, (_, i) => pcopy[p.id][i] ?? "");
+            pcopy[p.id] = arr;
+          }
+        });
+        Object.keys(pcopy).forEach((id) => {
+          if (!players.find((p) => p.id === id)) delete pcopy[id];
+        });
+        setPoints(pcopy);
+      }, [players, config.seasonJornadas]);
+
+      const jornadasFilled = useMemo(() => {
+        let max = 0;
+        const totalJ = config.seasonJornadas;
+        for (let j = 1; j <= totalJ; j++) {
+          const anyVal = players.some((p) => {
+            const v = points[p.id]?.[j - 1];
+            return v !== "" && v !== null && v !== undefined;
+          });
+          if (anyVal) max = j;
+        }
+        return max;
+      }, [points, players, config.seasonJornadas]);
+
+      const totals = useMemo(() => {
+        return players.map((p) => ({
+          id: p.id,
+          name: p.name,
+          value: sum(points[p.id] || []),
+        }));
+      }, [players, points]);
+
+      const rankingTotal = useMemo(() => rankEntries(totals), [totals]);
+
+      const rankingWinter = useMemo(() => {
+        const end = Math.min(config.winterEnd, config.seasonJornadas);
+        const entries = players.map((p) => ({
+          id: p.id,
+          name: p.name,
+          value: sum((points[p.id] || []).slice(0, end)),
+        }));
+        return rankEntries(entries);
+      }, [players, points, config]);
+
+      const sprints = useMemo(() => {
+        const segments = segmentIndices(config.seasonJornadas, config.sprintSize, config.sprintStopAt);
+        return segments.map(([a, b]) => {
+          const entries = players.map((p) => ({
+            id: p.id,
+            name: p.name,
+            value: sum((points[p.id] || []).slice(a - 1, b)),
+          }));
+          const ranked = rankEntries(entries);
+          const completed = jornadasFilled >= b;
+          return { range: [a, b], entries: ranked, completed };
+        });
+      }, [players, points, config, jornadasFilled]);
+
+      const moneyByPlayer = useMemo(() => {
+        const ledger = Object.fromEntries(players.map((p) => [p.id, 0]));
+
+        if (jornadasFilled >= config.winterEnd) {
+          const payout = config.payouts.winter;
+          rankingWinter.forEach(({ id, rank }) => {
+            const val = payout[rank] ?? 0;
+            ledger[id] += val;
+          });
+        }
+
+        sprints.forEach((sp) => {
+          if (!sp.completed) return;
+          const losers = sp.entries.slice(-config.payouts.sprintBottomN);
+          losers.forEach(({ id }) => {
+            ledger[id] -= config.payouts.sprintPay;
+          });
+        });
+
+        if (jornadasFilled >= config.seasonJornadas) {
+          const payout = config.payouts.final;
+          rankingTotal.forEach(({ id, rank }) => {
+            ledger[id] += payout[rank] ?? 0;
+          });
+        }
+
+        return ledger;
+      }, [players, rankingWinter, sprints, rankingTotal, config, jornadasFilled]);
+
+      const moneyTable = useMemo(() => {
+        return rankEntries(
+          players.map((p) => ({ id: p.id, name: p.name, value: moneyByPlayer[p.id] || 0 }))
+        );
+      }, [players, moneyByPlayer]);
+
+      const addPlayer = () => {
+        const newName = prompt("Nombre del nuevo jugador:");
+        if (!newName) return;
+        const n = { id: uuid(), name: newName.trim() };
+        setPlayers((prev) => [...prev, n]);
+        setToast("Añadido " + newName);
+        setTimeout(() => setToast(null), 1600);
+      };
+
+      const renamePlayer = (id) => {
+        const cur = players.find((p) => p.id === id);
+        const newName = prompt("Nuevo nombre:", cur?.name || "");
+        if (!newName) return;
+        setPlayers((prev) => prev.map((p) => (p.id === id ? { ...p, name: newName.trim() } : p)));
+        setToast("Renombrado a " + newName);
+        setTimeout(() => setToast(null), 1600);
+      };
+
+      const removePlayer = (id) => {
+        if (!confirm("¿Eliminar jugador? Esto borra sus puntos.")) return;
+        setPlayers((prev) => prev.filter((p) => p.id !== id));
+        setPoints((prev) => {
+          const cp = { ...prev };
+          delete cp[id];
+          return cp;
+        });
+      };
+
+      const setPoint = (id, jIndex, val) => {
+        setPoints((prev) => {
+          const cp = { ...prev };
+          const arr = [...(cp[id] || [])];
+          arr[jIndex] = val === "" ? "" : String(val).replace(",", ".");
+          cp[id] = arr;
+          return cp;
+        });
+      };
+
+      const clearAll = () => {
+        if (!confirm("¿Vaciar todos los datos?")) return;
+        setPlayers(defaultPlayers);
+        setConfig(defaultConfig);
+        setPoints(blankPoints(defaultPlayers, defaultConfig.seasonJornadas));
+      };
+
+      const exportJSON = () => {
+        const blob = new Blob([JSON.stringify({ players, config, points }, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "mister-fantasy-datos.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+
+      const importJSON = (file) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (parsed.players && parsed.config && parsed.points) {
+              setPlayers(parsed.players);
+              setConfig(parsed.config);
+              setPoints(parsed.points);
+              setToast("Datos importados");
+              setTimeout(() => setToast(null), 1600);
+            } else {
+              alert("Archivo no válido.");
+            }
+          } catch (e) {
+            alert("No se pudo leer el JSON");
+          }
+        };
+        reader.readAsText(file);
+      };
+
+      const completedSprintsCount = sprints.filter((s) => s.completed).length;
+
+      return (
+        <div className="min-h-screen">
+          <header className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b border-slate-200">
+            <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <h1 className="text-xl md:text-2xl font-semibold">Mister Fantasy · Panel sin hosting</h1>
+              <span className="ml-auto text-sm text-slate-500">Jornadas con datos: {jornadasFilled || 0}</span>
+            </div>
+          </header>
+
+          <main className="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-6">
+            <motion.div layout className="grid md:grid-cols-3 gap-4">
+              <Card>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold">Jugadores</h3>
+                    <p className="text-sm text-slate-500">Añade/edita a los managers.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={addPlayer}>Añadir</Button>
+                    <Button variant="ghost" onClick={exportJSON}>Exportar</Button>
+                    <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 cursor-pointer text-sm">
+                      Importar
+                      <input type="file" className="hidden" accept="application/json" onChange={(e) => e.target.files?.[0] && importJSON(e.target.files[0])} />
+                    </label>
+                  </div>
+                </div>
+                <ul className="mt-3 space-y-2">
+                  {players.map((p) => (
+                    <li key={p.id} className="flex items-center justify-between">
+                      <span>{p.name}</span>
+                      <div className="flex gap-1">
+                        <IconButton title="Renombrar" onClick={() => renamePlayer(p.id)}>✏️</IconButton>
+                        <IconButton title="Eliminar" onClick={() => removePlayer(p.id)}>🗑️</IconButton>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+
+              <Card>
+                <h3 className="font-semibold">Configuración</h3>
+                <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                  <Labeled number label="Jornadas temporada" value={config.seasonJornadas} onChange={(v) => setConfig((c) => ({ ...c, seasonJornadas: v }))} />
+                  <Labeled number label="Tamaño sprint" value={config.sprintSize} onChange={(v) => setConfig((c) => ({ ...c, sprintSize: v }))} />
+                  <Labeled number label="Última jornada con sprint" value={config.sprintStopAt} onChange={(v) => setConfig((c) => ({ ...c, sprintStopAt: v }))} />
+                  <Labeled number label="Fin campeonato de invierno" value={config.winterEnd} onChange={(v) => setConfig((c) => ({ ...c, winterEnd: v }))} />
+                </div>
+                <div className="mt-4">
+                  <h4 className="font-medium mb-2">Pagos</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                    <div className="col-span-2 text-slate-500">Final (aplica al completar la temporada)</div>
+                    {Array.from({ length: players.length }, (_, i) => i + 1).map((pos) => (
+                      <div key={pos} className="flex items-center gap-2">
+                        <span className="w-5">{pos}.</span>
+                        <input
+                          type="number"
+                          className="input"
+                          value={config.payouts.final[pos] ?? 0}
+                          onChange={(e) =>
+                            setConfig((c) => ({
+                              ...c,
+                              payouts: { ...c.payouts, final: { ...c.payouts.final, [pos]: Number(e.target.value) } },
+                            }))
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                    <div className="col-span-2 text-slate-500">Invierno (aplica al llegar a jornada {config.winterEnd})</div>
+                    {Array.from({ length: players.length }, (_, i) => i + 1).map((pos) => (
+                      <div key={pos} className="flex items-center gap-2">
+                        <span className="w-5">{pos}.</span>
+                        <input
+                          type="number"
+                          className="input"
+                          value={config.payouts.winter[pos] ?? 0}
+                          onChange={(e) =>
+                            setConfig((c) => ({
+                              ...c,
+                              payouts: { ...c.payouts, winter: { ...c.payouts.winter, [pos]: Number(e.target.value) } },
+                            }))
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <Labeled number label="Últimos N en sprint pagan" value={config.payouts.sprintBottomN}
+                             onChange={(v) => setConfig((c) => ({ ...c, payouts: { ...c.payouts, sprintBottomN: v } }))} />
+                    <Labeled number label="Importe por sprint (€/jugador)" value={config.payouts.sprintPay}
+                             onChange={(v) => setConfig((c) => ({ ...c, payouts: { ...c.payouts, sprintPay: v } }))} />
+                  </div>
+                </div>
+              </Card>
+
+              <Card>
+                <h3 className="font-semibold">Vista</h3>
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  <Button onClick={() => setActiveTab("datos")} active={activeTab === "datos"}>Datos</Button>
+                  <Button onClick={() => setActiveTab("clasif")} active={activeTab === "clasif"}>Clasificación</Button>
+                  <Button onClick={() => setActiveTab("dinero")} active={activeTab === "dinero"}>Dinero</Button>
+                </div>
+                <div className="mt-4 text-sm text-slate-600">
+                  <p>Progreso: {completedSprintsCount} / {sprints.length} sprints completos.</p>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Button variant="danger" onClick={clearAll}>Vaciar todo</Button>
+                </div>
+              </Card>
+            </motion.div>
+
+            <AnimatePresence mode="wait">
+              {activeTab === "datos" && (
+                <motion.div key="datos" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                  <Card>
+                    <h3 className="font-semibold mb-3">Entrada de puntos por jornada</h3>
+                    <div className="overflow-auto">
+                      <table className="min-w-full text-sm">
+                        <thead>
+                          <tr className="sticky top-0 bg-white">
+                            <th className="px-2 py-2 text-left">Jugador</th>
+                            {Array.from({ length: config.seasonJornadas }, (_, i) => (
+                              <th key={i} className="px-2 py-2 text-center whitespace-nowrap">J{i + 1}</th>
+                            ))}
+                            <th className="px-2 py-2 text-right">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {players.map((p) => (
+                            <tr key={p.id} className="odd:bg-slate-50">
+                              <td className="px-2 py-2 font-medium">{p.name}</td>
+                              {Array.from({ length: config.seasonJornadas }, (_, j) => (
+                                <td key={j} className="px-1 py-1">
+                                  <input
+                                    type="number"
+                                    inputMode="numeric"
+                                    className="input text-center w-20"
+                                    value={points[p.id]?.[j] ?? ""}
+                                    onChange={(e) => setPoint(p.id, j, e.target.value)}
+                                  />
+                                </td>
+                              ))}
+                              <td className="px-2 py-2 text-right font-semibold">{totals.find((t) => t.id === p.id)?.value ?? 0}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTab === "clasif" && (
+                <motion.div key="clasif" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="grid md:grid-cols-3 gap-4">
+                  <Card>
+                    <h3 className="font-semibold">Clasificación Total</h3>
+                    <RankingList entries={rankingTotal} highlightTopN={3} />
+                  </Card>
+                  <Card>
+                    <h3 className="font-semibold">Campeonato de Invierno (1–{config.winterEnd})</h3>
+                    <RankingList entries={rankingWinter} />
+                  </Card>
+                  <Card>
+                    <h3 className="font-semibold">Sprints</h3>
+                    <div className="space-y-3">
+                      {sprints.map((sp, idx) => (
+                        <div key={idx} className="border border-slate-200 rounded-2xl p-2">
+                          <div className="flex items-center gap-2">
+                            <span className={"text-xs px-2 py-0.5 rounded-full " + (sp.completed ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
+                              {sp.completed ? "Completado" : "En curso"}
+                            </span>
+                            <h4 className="font-medium">J{sp.range[0]}–J{sp.range[1]}</h4>
+                          </div>
+                          <RankingList compact entries={sp.entries} />
+                          <div className="text-xs text-slate-500 mt-1">Últimos {config.payouts.sprintBottomN} pagan {currency(config.payouts.sprintPay)} cada uno</div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTab === "dinero" && (
+                <motion.div key="dinero" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                  <Card>
+                    <h3 className="font-semibold mb-2">Balance por jugador (según tramos completados)</h3>
+                    <p className="text-sm text-slate-600 mb-4">Incluye: sprints terminados, Invierno si se alcanzó J{config.winterEnd}, y Final cuando se complete la temporada.</p>
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className="sticky top-0 bg-white">
+                          <th className="text-left px-2 py-2">Jugador</th>
+                          <th className="text-right px-2 py-2">Importe</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {moneyTable.map((row) => (
+                          <tr key={row.id} className="odd:bg-slate-50">
+                            <td className="px-2 py-2">{row.name}</td>
+                            <td className={"px-2 py-2 text-right font-semibold " + (row.value < 0 ? "text-rose-600" : row.value > 0 ? "text-emerald-700" : "")}>{currency(row.value)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div className="mt-4 text-sm text-slate-600">
+                      <p>Total sprints completados: {completedSprintsCount} · Recaudado por sprints: {currency(completedSprintsCount * config.payouts.sprintBottomN * config.payouts.sprintPay)}</p>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
+
+          <AnimatePresence>
+            {toast && (
+              <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
+                           className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-sm px-4 py-2 rounded-2xl shadow-xl">
+                {toast}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      );
+    }
+
+    // UI components
+    function Card({ children }) {
+      return <div className="bg-white rounded-3xl p-4 shadow-soft border border-slate-200">{children}</div>;
+    }
+
+    function Button({ children, onClick, variant = "solid", active = false }) {
+      const base = "px-3 py-1.5 rounded-2xl text-sm transition";
+      const styles =
+        variant === "danger"
+          ? "bg-rose-600 text-white hover:bg-rose-700"
+          : variant === "ghost"
+          ? ("bg-slate-100 hover:bg-slate-200 " + (active ? "ring-2 ring-slate-300" : ""))
+          : ("bg-slate-900 text-white hover:bg-slate-800 " + (active ? "ring-2 ring-slate-300" : ""));
+      return (
+        <button className={base + " " + styles} onClick={onClick}>
+          {children}
+        </button>
+      );
+    }
+
+    function IconButton({ children, onClick, title }) {
+      return (
+        <button className="px-2 py-1 rounded-xl text-sm bg-slate-100 hover:bg-slate-200" onClick={onClick} title={title}>
+          {children}
+        </button>
+      );
+    }
+
+    function Labeled({ label, value, onChange, number }) {
+      return (
+        <label className="grid gap-1">
+          <span className="text-xs text-slate-500">{label}</span>
+          <input
+            type={number ? "number" : "text"}
+            className="input"
+            value={value}
+            onChange={(e) => onChange(number ? Number(e.target.value) : e.target.value)}
+          />
+        </label>
+      );
+    }
+
+    function RankingList({ entries, compact = false, highlightTopN = 0 }) {
+      return (
+        <ol className="mt-2 space-y-1">
+          {entries.map((e) => (
+            <li key={e.id} className={"flex items-center justify-between " + (compact ? "text-sm" : "")}>
+              <div className="flex items-center gap-2">
+                <span className={"w-7 text-center font-semibold " + (e.rank <= highlightTopN ? "text-emerald-700" : "text-slate-600")}>{e.rank}.</span>
+                <span>{e.name}</span>
+              </div>
+              <span className="tabular-nums text-slate-700 font-medium">{e.value}</span>
+            </li>
+          ))}
+        </ol>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
