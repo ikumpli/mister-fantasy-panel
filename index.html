@@ -551,10 +551,10 @@
       }
 
       els.pagosEstado.textContent = `Sprints aplicados: ${sprintDefs.filter(([a,b])=>filled>=b).length}/${sprintDefs.length} · ` +
-        `Invierno: ${winterCompleted2?'aplicado':'pendiente'} · Total: ${totalCompleted2?'aplicado':'pendiente'}`;
+        `Invierno: ${winterCompleted2?'aplicado':'pendiente'} · Liga General: ${totalCompleted2?'aplicado':'pendiente'}`;
 
       // Tabla de pagos detallada
-      const header = ['Jugador','Por sprints (€)','Invierno (€)','Total (€)','Dinero pagado (€)','Acumulado (€)'];
+      const header = ['Jugador','Por sprints (€)','Invierno (€)','Liga General (€)','Dinero pagado (€)','Acumulado (€)'];
       let pagosHtml = '<table><thead><tr>' + header.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>';
       // recomputar partes para mostrar detalle por jugador
       const byId = id => players.find(p=>p.id===id)?.name || id;
