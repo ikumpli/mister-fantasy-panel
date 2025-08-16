@@ -1,47 +1,47 @@
 {
   "players": [
     {
-      "id": "p1",
+      "id": "Ji",
       "name": "Jimmy"
     },
     {
-      "id": "p2",
-      "name": "Iñaku"
+      "id": "Iñ",
+      "name": "Iñaki"
     },
     {
-      "id": "p3",
+      "id": "Eg",
       "name": "Egoitz"
     },
     {
-      "id": "p4",
+      "id": "Vi",
       "name": "Villar"
     },
     {
-      "id": "p5",
+      "id": "Cu",
       "name": "Cumpli"
     },
     {
-      "id": "p6",
+      "id": "Ma",
       "name": "Mayo"
     },
     {
-      "id": "p7",
+      "id": "Ch",
       "name": "Chigrin"
     },
     {
-      "id": "p8",
+      "id": "Za",
       "name": "Zarra"
     },
     {
-      "id": "p9",
+      "id": "Al",
       "name": "Alan"
     },
     {
-      "id": "p10",
+      "id": "Ju",
       "name": "Juan"
     },
     {
-      "id": "p11",
+      "id": "El",
       "name": "Eleder"
     }
   ],
@@ -51,7 +51,7 @@
     "p1": [
       30,
       33,
-      34,
+      0,
       32,
       30,
       33,

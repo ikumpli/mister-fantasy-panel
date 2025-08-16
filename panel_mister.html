@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mister Fantasy · Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0b1020;
+      --bg2:#0d1330;
+      --card:#11162a;
+      --muted:#9aa4b2;
+      --fg:#e6eaf2;
+      --accent:#6ee7b7;
+      --accent2:#93c5fd;
+      --accent3:#fca5a5;
+      --line:#232a43;
+      --good:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--fg);
+      background: radial-gradient(1200px 600px at 10% -10%, #1c2444, transparent) no-repeat,
+                  radial-gradient(1000px 600px at 110% 10%, #15203b, transparent) no-repeat,
+                  var(--bg);
+      min-height:100vh;
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:20px;}
+    header{display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px;}
+    h1{font-size:22px; margin:0; display:flex; gap:10px; align-items:center}
+    .tag{font-size:12px; color:#a8f3d4}
+    .muted{color:var(--muted); font-size:13px}
+    .grid{display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));}
+    .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow: 0 10px 30px rgba(0,0,0,.25);}
+    .bar{ background:#1f2a4f; height:14px; border-radius:8px; position:relative; overflow:hidden; }
+    .bar > span { position:absolute; left:0; top:0; bottom:0; background:var(--accent); }
+    table{ width:100%; border-collapse:collapse; font-size:13px; }
+    th, td{ border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; }
+    th{ position:sticky; top:0; background:var(--card); z-index:1; }
+    td.right, th.right{ text-align:right; }
+    tbody tr:nth-child(odd){ background: rgba(255,255,255,0.02); }
+    .pill{ font-size:12px; padding:3px 8px; border-radius:999px; background:#0ea5e9; }
+    .pill.warn{ background: var(--warn); color:#111; }
+    .pill.good{ background: var(--good); color:#111; }
+    .pill.bad{ background: var(--bad); }
+    .tabs{ display:flex; gap:6px; background:rgba(255,255,255,0.03); border:1px solid var(--line); border-radius:12px; padding:6px; }
+    .tab{ padding:8px 12px; cursor:pointer; border-radius:10px; border:1px solid transparent; user-select:none; }
+    .tab.active{ background:var(--card); border-color:var(--line); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03); }
+    .views{ margin-top:12px; }
+    .view{ display:none; }
+    .view.active{ display:block; }
+    .kpis{ display:flex; gap:10px; flex-wrap:wrap; }
+    .kpi{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:8px 10px; min-width:150px;}
+    .kpi .v{ font-weight:700; font-size:16px; }
+    .flag-bottom{ background: rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.35); color:#fecaca; padding:2px 6px; border-radius:8px; font-size:12px;}
+    .sprintTitle{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:6px;}
+    .sprintGrid{ display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .note{ font-size:12px; color:var(--muted); }
+    .error { background:#3a1e2a; border:1px solid #5b2038; color:#ffd6e0; padding:10px; border-radius:10px; }
+    .fileBtn { display:inline-block; padding:6px 10px; border:1px dashed var(--line); border-radius:10px; cursor:pointer; }
+    a{ color: var(--accent2); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>⚽ Mister Fantasy <span class="tag" id="seasonTag"></span></h1>
+      <div class="muted" id="status">Cargando datos…</div>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <div class="tab active" data-tab="total">🏆 Total</div>
+      <div class="tab" data-tab="invierno">❄️ Invierno</div>
+      <div class="tab" data-tab="sprints">🚀 Sprints</div>
+      <div class="tab" data-tab="pagos">💶 Pagos</div>
+      <div class="tab" data-tab="tabla">📋 Jornadas</div>
+    </nav>
+
+    <!-- KPIs globales -->
+    <div class="card" id="kpiRow" style="margin-top:12px;">
+      <div class="kpis">
+        <div class="kpi"><div class="v" id="kpiJornadas">-</div><div class="muted">Jornadas con datos</div></div>
+        <div class="kpi"><div class="v" id="kpiJugadores">-</div><div class="muted">Jugadores</div></div>
+        <div class="kpi"><div class="v" id="kpiTemporada">-</div><div class="muted">Temporada (J)</div></div>
+      </div>
+    </div>
+
+    <section class="views">
+      <!-- TOTAL -->
+      <div class="view active" id="view-total">
+        <div class="grid">
+          <div class="card">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+              <h3 style="margin:0 0 6px;">Clasificación Total</h3>
+              <span id="pillTotal" class="pill warn">Provisional</span>
+            </div>
+            <div class="muted" style="margin:-2px 0 8px;">Si la liga no ha terminado, los importes se muestran <em>como si acabara hoy</em>.</div>
+            <ol id="rankTotal" style="padding-left:16px; margin:0; display:grid; gap:6px;"></ol>
+          </div>
+          <div class="card">
+            <h3 style="margin:0 0 6px;">Barras Totales</h3>
+            <div id="bars" style="display:grid; gap:6px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVIERNO -->
+      <div class="view" id="view-invierno">
+        <div class="grid">
+          <div class="card">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+              <h3 style="margin:0 0 6px;">Campeonato de Invierno</h3>
+              <span id="pillWinter" class="pill warn">Pendiente</span>
+            </div>
+            <div class="muted">J1–<span id="winterTo">?</span></div>
+            <ol id="rankWinter" style="padding-left:16px; margin:4px 0 0; display:grid; gap:6px;"></ol>
+          </div>
+          <div class="card">
+            <h3 style="margin:0 0 6px;">Top Invierno (barras)</h3>
+            <div id="barsWinter" style="display:grid; gap:6px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPRINTS -->
+      <div class="view" id="view-sprints">
+        <div class="sprintGrid" id="sprintGrid"></div>
+        <p class="note" style="margin-top:8px;">En cada sprint, los últimos 4 jugadores pagan 5€.</p>
+      </div>
+
+      <!-- PAGOS -->
+      <div class="view" id="view-pagos">
+        <div class="card">
+          <div class="sprintTitle">
+            <h3 style="margin:0">Pagos acumulados</h3>
+            <div class="muted" id="pagosEstado">Calculado con sprints completados</div>
+          </div>
+          <div class="muted" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+            <span>Archivo de pagos opcional: <code>mister-pagos.json</code></span>
+            <label class="fileBtn">Cargar
+              <input type="file" accept="application/json" style="display:none" onchange="loadPagosFromFile(this.files[0])">
+            </label>
+          </div>
+          <div id="pagosTableWrap" style="overflow:auto; border:1px solid var(--line); border-radius:12px;"></div>
+          <p class="note">Reglas: últimos 4 de cada sprint pagan 5€; Invierno y Total según tablas. Los importes de Invierno y Total se aplican cuando estén completados.</p>
+        </div>
+      </div>
+
+      <!-- TABLA JORNADAS -->
+      <div class="view" id="view-tabla">
+        <div class="card" style="grid-column: 1 / -1;">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">
+            <h3 style="margin:0">Puntos por jornada</h3>
+            <div class="muted">Jornadas con datos: <span id="filledCount">0</span></div>
+          </div>
+          <div id="tableWrap" style="overflow:auto; border:1px solid var(--line); border-radius:12px; margin-top:8px; max-height: 60vh;"></div>
+<div class="card" style="margin-top:12px;">
+  <h3 style="margin:0 0 6px;">Evolución acumulada por jornada</h3>
+  <div class="muted" style="margin-bottom:6px;">Puntos acumulados (J1 → JN) para cada jugador.</div>
+  <canvas id="cumChart" height="280" style="width:100%; display:block; background:rgba(255,255,255,0.02); border:1px solid var(--line); border-radius:12px;"></canvas>
+  <div id="cumLegend" class="muted" style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+</div>
+        </div>
+      </div>
+    </section>
+
+    <div id="fallback" style="display:none; margin-top:16px;">
+      <div class="error">
+        No se pudo cargar <code>mister-datos.json</code> (si abriste este archivo con doble clic, algunos navegadores bloquean <em>fetch</em> en local).
+      </div>
+      <p class="muted">Soluciones:</p>
+      <ol class="muted">
+        <li>Sube ambos archivos a GitHub Pages (funcionará directamente).</li>
+        <li>O bien, carga el JSON manualmente aquí:
+          <label class="fileBtn">Seleccionar archivo
+            <input type="file" accept="application/json" style="display:none" onchange="loadFromFile(this.files[0])">
+          </label>
+        </li>
+        <li>O ejecuta un servidor local: <code>python3 -m http.server</code> y abre <a href="#" onclick="alert('http://localhost:8000/panel-tabs.html')">http://localhost:8000/panel-tabs.html</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    // --- helpers
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    function sum(arr){ return arr.reduce((a,b)=> a + (Number(b)||0), 0); }
+    function esc(s){ return (s??'').toString().replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function euro(v){ const n = Number(v)||0; return (n>=0?'+':'') + n.toFixed(2).replace('.',',') + '€'; }
+
+    // --- tabs
+    // --- chart helpers
+    const palette = Array.from({length: 11}, (_,i)=>`hsl(${(i*330/11)|0} 80% 60%)`);
+    function cumulativeSeries(points, players, seasonJ){
+      const series = {}; // id -> [cum_j1, cum_j2, ...]
+      players.forEach((p)=>{
+        const row = (points[p.id]||[]).slice(0, seasonJ).map(x=>Number(x)||0);
+        const cum = [];
+        let acc = 0;
+        for(let j=0;j<seasonJ;j++){ acc += (row[j]||0); cum.push(acc); }
+        series[p.id] = cum;
+      });
+      return series;
+    }
+    function drawCumChart(canvas, players, series, n){
+      const ctx = canvas.getContext('2d');
+      const W = (canvas.parentElement?.clientWidth||canvas.clientWidth||600);
+      const H = canvas.height;
+      canvas.width = W; // ensure sharpness
+      ctx.clearRect(0,0,W,H);
+      // axes padding
+      const padL = 40, padR = 10, padT = 10, padB = 22;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      // x ticks = filled (or at least 1)
+      n = Math.max(1, n);
+      // y max
+      let yMax = 1;
+      players.forEach((p)=>{ const s = series[p.id]; yMax = Math.max(yMax, s[n-1]||0); });
+      // nice y max
+      const pow10 = 10 ** Math.floor(Math.log10(yMax||1));
+      yMax = Math.ceil(yMax / pow10) * pow10;
+      // scales
+      const x = j => padL + (plotW * (j/(n-1||1)));
+      const y = v => padT + plotH - (plotH * (v/(yMax||1)));
+      // grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      // y grid 5 lines
+      for(let k=0;k<=5;k++){ const yy = y(yMax*k/5); ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(W-padR,yy); ctx.stroke(); }
+      // x axis
+      ctx.beginPath(); ctx.moveTo(padL,H-padB); ctx.lineTo(W-padR,H-padB); ctx.stroke();
+      // labels
+      ctx.fillStyle = '#9aa4b2'; ctx.font = '12px Inter, ui-sans-serif';
+      for(let k=0;k<=5;k++){ const val = Math.round(yMax*k/5); const yy = y(val)+4; ctx.fillText(String(val), 4, yy); }
+      for(let j=1;j<=n;j++){ const xx = x(j-1); if(j%5===1 || j===n) ctx.fillText('J'+j, xx-8, H-6); }
+      // lines
+      players.forEach((p,idx)=>{
+        const s = series[p.id];
+        ctx.strokeStyle = palette[idx%palette.length];
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for(let j=0;j<n;j++){ const xx=x(j), yy=y(s[j]||0); if(j===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy); }
+        ctx.stroke();
+      });
+    }
+
+    $$('#tabs .tab').forEach(t => {
+      t.addEventListener('click', () => {
+        $$('#tabs .tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        const id = t.dataset.tab;
+        $$('.view').forEach(v => v.classList.remove('active'));
+        $('#view-'+id).classList.add('active');
+      });
+    });
+
+    const statusEl = $('#status');
+    const fallback = $('#fallback');
+
+    const els = {
+      seasonTag: $('#seasonTag'),
+      kpiJornadas: $('#kpiJornadas'),
+      kpiJugadores: $('#kpiJugadores'),
+      kpiTemporada: $('#kpiTemporada'),
+      tableWrap: $('#tableWrap'),
+      filledCount: $('#filledCount'),
+      winterTo: $('#winterTo'),
+      rankTotal: $('#rankTotal'),
+      rankWinter: $('#rankWinter'),
+      bars: $('#bars'),
+      barsWinter: $('#barsWinter'),
+      sprintGrid: $('#sprintGrid'),
+      pagosTableWrap: $('#pagosTableWrap'),
+      pagosEstado: $('#pagosEstado'),
+    };
+
+    // Reglas de pagos (según PDF)
+    const payoutsTotal = [55,30,0,-10,-10,-15,-15,-15,-20,-20,-20]; // 1..11
+    const payoutsWinter = [0,0,0,-5,-5,-5,-5,-10,-10,-10,-10]; // 1..11
+    const sprintLoserCharge = -5; // para los 4 últimos de cada sprint
+    const sprintDefs = [
+      [1,5],[6,10],[11,15],[16,20],[21,25],[26,30],[31,35]
+    ]; // últimas 3 jornadas no cuentan
+
+    async function init(){
+      // intentamos cargar mister-pagos.json (opcional)
+      let pagosData = {};
+      try{
+        const r2 = await fetch('mister-pagos.json', {cache:'no-store'});
+        if(r2.ok){ pagosData = await r2.json(); statusEl.textContent += ' · Pagos cargados.'; }
+        else { statusEl.textContent += ' · Pagos no encontrados (0€).'; }
+      }catch(e){ statusEl.textContent += ' · Pagos no encontrados (0€).'; }
+
+      try{
+        const res = await fetch('mister-datos.json', {cache:'no-store'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        statusEl.textContent = 'Datos cargados.';
+        const pagos = (window.__pagosOverride) ? window.__pagosOverride : (typeof pagosData==='object'?pagosData:{});
+        render(data, pagos);
+      }catch(e){
+        statusEl.textContent = 'No se pudieron cargar los datos automáticamente.';
+        fallback.style.display = 'block';
+      }
+    }
+
+
+    function loadPagosFromFile(file){
+      const r = new FileReader();
+      r.onload = () => {
+        try{
+          window.__pagosOverride = JSON.parse(r.result);
+          alert('Pagos cargados. Recalcula la vista si no se ha actualizado automáticamente.');
+          init(); // recargar
+        }catch(e){ alert('Archivo de pagos no válido'); }
+      };
+      r.readAsText(file);
+    }
+
+    function loadFromFile(file){
+      const r = new FileReader();
+      r.onload = () => {
+        try{
+          const data = JSON.parse(r.result);
+          statusEl.textContent = 'Datos cargados desde archivo.';
+          fallback.style.display = 'none';
+          render(data);
+        }catch(e){ alert('Archivo no válido'); }
+      };
+      r.readAsText(file);
+    }
+
+    function computeFilledJ(points, players, seasonJ){
+      let max = 0;
+      for(let j=0; j<seasonJ; j++){
+        const any = players.some(p => {
+          const row = points[p.id] || [];
+          const v = row[j];
+          return v !== '' && v !== null && v !== undefined && v !== undefined;
+        });
+        if(any) max = j+1;
+      }
+      return max;
+    
+    }
+
+    // Jornadas completas: todas las personas tienen un número válido en esa jornada
+    function computeFilledAll(points, players, seasonJ){
+      let nAll = 0;
+      for(let j=0; j<seasonJ; j++){
+        const allHave = players.every(p => {
+          const v = (points[p.id]||[])[j];
+          return v !== '' && v !== null && v !== undefined && !isNaN(Number(v));
+        });
+        if(allHave) nAll = j+1; else break;
+      }
+      return nAll;
+    }
+    
+    function totalsByRange(points, players, startJ, endJ){ // inclusive indices by jornada number (1-based)
+      const sIdx = startJ-1, eIdx = endJ-1;
+      return players.map(p => {
+        const row = points[p.id] || [];
+        let v = 0;
+        for(let j=sIdx; j<=eIdx; j++){
+          const x = row[j];
+          v += Number(x)||0;
+        }
+        return {id:p.id, name:p.name, value:v};
+      }).sort((a,b)=> b.value - a.value);
+    }
+
+    function render(data, pagos){
+      // pagos structure: { byId: {<playerId>: number} } OR flat {<playerId>: number}
+      function getPaidFor(id){
+        if(!pagos) return 0;
+        if(pagos.byId && typeof pagos.byId[id] === 'number') return Number(pagos.byId[id])||0;
+        if(typeof pagos[id] === 'number') return Number(pagos[id])||0;
+        return 0;
+      }
+
+      const { players, seasonJ, winterEnd, points } = data;
+      els.seasonTag.textContent = `Temporada: ${seasonJ} jornadas · Invierno hasta J${winterEnd}`;
+
+      // KPIs y jornadas con datos
+      const filled = computeFilledJ(points, players, seasonJ);
+      els.kpiJornadas.textContent = filled;
+      els.kpiJugadores.textContent = players.length;
+      els.kpiTemporada.textContent = seasonJ;
+      els.filledCount.textContent = filled;
+      els.winterTo.textContent = winterEnd;
+
+      // Tabla jornadas
+      let html = '<table><thead><tr><th>Jugador</th>';
+      for(let i=0;i<seasonJ;i++){ html += `<th class="right">J${i+1}</th>`; }
+      html += `<th class="right">Total</th></tr></thead><tbody>`;
+      const totals = {};
+      players.forEach(p => {
+        const row = points[p.id] || [];
+        totals[p.id] = row.slice(0,seasonJ).reduce((a,b)=>a + (Number(b)||0), 0);
+        html += `<tr><td>${esc(p.name)}</td>`;
+        for(let j=0;j<seasonJ;j++){
+          const v = row[j] ?? "";
+          html += `<td class="right">${v!==""?v:""}</td>`;
+        }
+        html += `<td class="right"><strong>${totals[p.id]}</strong></td></tr>`;
+      });
+      html += "</tbody></table>";
+      els.tableWrap.innerHTML = html;
+      // Cumulative chart
+      const series = cumulativeSeries(points, players, seasonJ);
+      const canvas = document.getElementById('cumChart');
+      const filledAll = computeFilledAll(points, players, seasonJ);
+      if (canvas){
+        if(filledAll <= 0){
+          const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
+          const msg = 'Aún no hay ninguna jornada con datos de TODOS los jugadores.';
+          canvas.width = canvas.parentElement.clientWidth || canvas.width;
+          ctx.fillStyle = '#9aa4b2'; ctx.font = '14px Inter, ui-sans-serif'; ctx.fillText(msg, 16, 24);
+        }else{
+          drawCumChart(canvas, players, series, filledAll);
+          // redraw on resize
+          let ro;
+          if('ResizeObserver' in window){
+            ro = new ResizeObserver(()=>drawCumChart(canvas, players, series, filledAll));
+            ro.observe(canvas.parentElement);
+          }else{
+            window.addEventListener('resize', ()=>drawCumChart(canvas, players, series, filledAll));
+          }
+        }
+      }
+      // Legend
+      const legend = document.getElementById('cumLegend');
+      if (legend){
+        legend.innerHTML = players.map((p,i)=>`<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:999px;display:inline-block;background:${palette[i%palette.length]};"></span>${esc(p.name)}</span>`).join('');
+      }
+
+
+      // Ranking total + barras
+      const totalArr = players.map(p => ({id:p.id, name:p.name, value: totals[p.id]})).sort((a,b)=>b.value-a.value);
+      const totalCompleted = filled >= seasonJ;
+      if (els.pillTotal) {
+        els.pillTotal.textContent = totalCompleted ? 'Aplicado' : 'Provisional';
+        els.pillTotal.className = 'pill ' + (totalCompleted ? 'good' : 'warn');
+      }
+      els.rankTotal.innerHTML = totalArr.map((t,i)=>{
+        const delta = (payoutsTotal[i] ?? 0);
+        const chip = `<span class="pill ${delta<0?'bad':'good'}" title="Pago por puesto">${delta>0?'+':''}${delta}€</span>`;
+        const extra = totalCompleted ? chip : (chip + ' <span class="tag">(prov.)</span>');
+        return `<li style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+          <span>${i+1}. ${esc(t.name)} <span class="tag">${t.value}</span></span>
+          ${extra}
+        </li>`;
+      }).join("");
+      const maxVal = Math.max(1, ...totalArr.map(t=>t.value));
+      els.bars.innerHTML = totalArr.map(t => {
+        const pct = Math.round((t.value / maxVal) * 100);
+        return `<div>
+          <div style="display:flex;justify-content:space-between;font-size:12px"><span>${esc(t.name)}</span><span class="tag">${t.value}</span></div>
+          <div class="bar"><span style="width:${pct}%"></span></div>
+        </div>`;
+      }).join("");
+
+      // Invierno
+      const wEnd = Math.min(winterEnd, seasonJ);
+      const winterArr = totalsByRange(points, players, 1, wEnd);
+      const winterCompleted = filled >= wEnd;
+      if (els.pillWinter) {
+        els.pillWinter.textContent = winterCompleted ? 'Aplicado' : 'Pendiente';
+        els.pillWinter.className = 'pill ' + (winterCompleted ? 'good' : 'warn');
+      }
+      els.rankWinter.innerHTML = winterArr.map((t,i)=>{
+        const delta = (payoutsWinter[i] ?? 0);
+        const showDelta = winterCompleted ? `<span class=\"pill ${delta<0?'bad':'good'}\">${delta>0?'+':''}${delta}€</span>` : '<span class=\"tag\">(pendiente)</span>';
+        return `<li style=\"display:flex;align-items:center;gap:8px;justify-content:space-between;\">`
+          + `<span>${i+1}. ${esc(t.name)} <span class=\"tag\">${t.value}</span></span>`
+          + showDelta + `</li>`;
+      }).join("");
+      const wMax = Math.max(1, ...winterArr.map(t=>t.value));
+      els.barsWinter.innerHTML = winterArr.map(t=>{
+        const pct = Math.round((t.value/wMax)*100);
+        return `<div>
+          <div style=\"display:flex;justify-content:space-between;font-size:12px\"><span>${esc(t.name)}</span><span class=\"tag\">${t.value}</span></div>
+          <div class=\"bar\"><span style=\"width:${pct}%\"></span></div>
+        </div>`;
+      }).join("");
+
+      // Sprints
+      const sprintsHtml = [];
+      const completedSprints = [];
+      sprintDefs.forEach((def, idx) => {
+        const [a,b] = def;
+        const arr = totalsByRange(points, players, a, b);
+        const losers = arr.slice(-4).map(x=>x.id);
+        const completed = filled >= b; // sprint completo si tenemos todas sus jornadas
+        if(completed) completedSprints.push(idx);
+        sprintsHtml.push(`
+          <div class="card">
+            <div class="sprintTitle">
+              <h3 style="margin:0">Sprint ${idx+1} · J${a}–J${b}</h3>
+              <span class="pill ${completed ? 'good' : 'warn'}">${completed ? 'Completado' : 'En curso'}</span>
+            </div>
+            <ol style="padding-left:16px; margin:0; display:grid; gap:4px;">
+              ${arr.map((t,i)=>{
+                const last = losers.includes(t.id);
+                return `<li>${i+1}. ${esc(t.name)} <span class="tag">${t.value}</span> ${last?'<span class="flag-bottom">paga 5€</span>':''}</li>`;
+              }).join("")}
+            </ol>
+          </div>
+        `);
+      });
+      els.sprintGrid.innerHTML = sprintsHtml.join("");
+
+      // Pagos
+      const payments = {}; // id -> number
+      players.forEach(p=>payments[p.id]=0);
+
+      // Sprints terminados: últimos 4 pagan -5
+      sprintDefs.forEach((def, idx) => {
+        const [a,b] = def;
+        if(filled >= b){
+          const arr = totalsByRange(points, players, a, b);
+          arr.slice(-4).forEach(t => { payments[t.id] += sprintLoserCharge; });
+        }
+      });
+
+      // Invierno: aplicar si completado
+      const winterCompleted2 = filled >= wEnd;
+      if(winterCompleted2){
+        winterArr.forEach((t, i) => {
+          const delta = payoutsWinter[i] ?? 0;
+          payments[t.id] += delta;
+        });
+      }
+
+      // Total: aplicar si temporada completa
+      const totalCompleted2 = filled >= seasonJ;
+      if(totalCompleted2){
+        totalArr.forEach((t, i) => {
+          const delta = payoutsTotal[i] ?? 0;
+          payments[t.id] += delta;
+        });
+      }
+
+      els.pagosEstado.textContent = `Sprints aplicados: ${sprintDefs.filter(([a,b])=>filled>=b).length}/${sprintDefs.length} · ` +
+        `Invierno: ${winterCompleted2?'aplicado':'pendiente'} · Total: ${totalCompleted2?'aplicado':'pendiente'}`;
+
+      // Tabla de pagos detallada
+      const header = ['Jugador','Por sprints (€)','Invierno (€)','Total (€)','Dinero pagado (€)','Acumulado (€)'];
+      let pagosHtml = '<table><thead><tr>' + header.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+      // recomputar partes para mostrar detalle por jugador
+      const byId = id => players.find(p=>p.id===id)?.name || id;
+
+      // detalle sprints por jugador
+      const sprintCharges = {}; players.forEach(p=>sprintCharges[p.id]=0);
+      sprintDefs.forEach(([a,b])=>{
+        if(filled>=b){
+          const arr = totalsByRange(points, players, a, b);
+          arr.slice(-4).forEach(t => { sprintCharges[t.id] += sprintLoserCharge; });
+        }
+      });
+
+      const winterCharges = {}; players.forEach(p=>winterCharges[p.id]=0);
+      if(winterCompleted2){
+        winterArr.forEach((t,i)=>{
+          winterCharges[t.id] += payoutsWinter[i] ?? 0;
+        });
+      }
+      const totalCharges = {}; players.forEach(p=>totalCharges[p.id]=0);
+      if(totalCompleted2){
+        totalArr.forEach((t,i)=>{
+          totalCharges[t.id] += payoutsTotal[i] ?? 0;
+        });
+      }
+
+      const orderByDebt = players.map(p=>{
+        const acc = payments[p.id]||0;
+        return {id:p.id, name:p.name, acc};
+      }).sort((a,b)=> a.acc - b.acc); // más negativo primero
+
+      orderByDebt.forEach(r=>{
+        const s = sprintCharges[r.id]||0;
+        const w = winterCharges[r.id]||0;
+        const t = totalCharges[r.id]||0;
+        const acc = s+w+t;
+        const cls = acc<0?'bad':(acc>0?'good':'');
+        const paid = getPaidFor(r.id);
+        pagosHtml += `<tr>
+          <td>${esc(r.name)}</td>
+          <td class="right">${euro(s)}</td>
+          <td class="right">${euro(w)}</td>
+          <td class="right">${euro(t)}</td>
+          <td class="right">${euro(paid)}</td>
+          <td class="right"><strong class="${cls}">${euro(acc)}</strong></td>
+        </tr>`;
+      });
+      pagosHtml += '</tbody></table>';
+      els.pagosTableWrap.innerHTML = pagosHtml;
+    }
+
+    init();
+  </script>
+</body>
+</html>
