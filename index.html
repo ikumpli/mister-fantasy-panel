@@ -99,7 +99,7 @@
       <div class="kpis">
         <div class="kpi"><div class="v" id="kpiJornadas">-</div><div class="muted">Jornadas con datos</div></div>
         <div class="kpi"><div class="v" id="kpiJugadores">-</div><div class="muted">Jugadores</div></div>
-        <div class="kpi"><div class="v" id="kpiTemporada">-</div><div class="muted">Jornadas de liga</div></div><button class="kpi pot-kpi" onclick="document.querySelector('[data-tab=bote]').click()"><div class="v">160 € ↗</div><div class="muted">Bote común previsto</div></button>
+        <div class="kpi"><div class="v" id="kpiTemporada">-</div><div class="muted">Jornadas de liga</div></div><button class="kpi pot-kpi" onclick="document.querySelector('[data-tab=bote]').click()"><div class="v">185 € ↗</div><div class="muted">Bote común previsto</div></button>
       </div>
     </div>
 
@@ -260,7 +260,7 @@
     };
 
     // Reglas de la temporada 2026-27
-    const payoutsTotal = [55,30,0,-10,-10,-15,-15,-15,-20,-20]; // 1..10
+    const payoutsTotal = [40,20,0,-10,-10,-15,-15,-15,-20,-20]; // 1..10
     const sprintLoserCharge = -5; // para los 4 últimos de cada sprint
     const sprintDefs = [
       [1,5],[6,10],[11,15],[16,20],[21,25],[26,30],[31,35]
@@ -463,8 +463,8 @@
         ['Sprints',`7 × 4 jugadores × 5 €`,sprintIncome],
         ['General','2 × 10 € + 3 × 15 € + 2 × 20 €',generalIncome],
         ['Recaudación total prevista','Sprints + general',income],
-        ['Premios','1.º: 55 € · 2.º: 30 €',-prizes],
-        ['Bote para todos','Equivale a 16 € por participante; se conserva como bote común.',income-prizes]
+        ['Premios',`1.º: ${money(payoutsTotal[0])} · 2.º: ${money(payoutsTotal[1])}`,-prizes],
+        ['Bote para todos',`Equivale a ${new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format((income-prizes)/players.length)} por participante; se conserva como bote común.`,income-prizes]
       ].map(([label,detail,value])=>`<div class="money-row"><div><strong>${label}</strong><small>${detail}</small></div><b>${money(value)}</b></div>`).join('');
       $('#generalRules').innerHTML = payoutsTotal.map((v,i)=>`<div class="rule"><span>${i+1}.º puesto</span><strong class="${v>0?'reward':''}">${v>0?'Gana ':v<0?'Aporta ':''}${money(Math.abs(v))}</strong></div>`).join('');
     }

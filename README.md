@@ -6,11 +6,11 @@ Panel estático para diez participantes. Jornadas 1–4 cargadas desde las captu
 
 - Sprints: J1–5, J6–10, J11–15, J16–20, J21–25, J26–30, J31–35.
 - Los cuatro últimos de cada sprint aportan 5 €: 7 × 4 × 5 = 140 €.
-- General: 1.º gana 55 €, 2.º gana 30 €, 3.º no paga; 4.º y 5.º aportan 10 €; 6.º–8.º aportan 15 €; 9.º y 10.º aportan 20 €.
+- General: 1.º gana 40 €, 2.º gana 20 €, 3.º no paga; 4.º y 5.º aportan 10 €; 6.º–8.º aportan 15 €; 9.º y 10.º aportan 20 €.
 - Aportaciones de la general: 2 × 10 + 3 × 15 + 2 × 20 = 105 €.
 - Recaudación prevista: 140 + 105 = 245 €.
-- Premios: 55 + 30 = 85 €.
-- Bote común final previsto: 245 − 85 = **160 €**.
+- Premios: 40 + 20 = 60 €.
+- Bote común final previsto: 245 − 60 = **185 €**.
 
 No es un registro de cobros realizados. Las jornadas 36–38 cuentan únicamente para la general. Un sprint solo se completa cuando existen datos de todos sus jugadores en todas sus jornadas. En la general, los empates se ordenan alfabéticamente, se indican con «Empate» y mantienen el importe de cada posición consecutiva. Si hay empate en el corte de pagos de un sprint, queda pendiente el desempate entre amigos; el panel no inventa un criterio.
 
