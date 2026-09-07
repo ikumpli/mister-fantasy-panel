@@ -12,7 +12,7 @@ Panel estático para diez participantes. Jornadas 1–4 cargadas desde las captu
 - Premios: 55 + 30 = 85 €.
 - Bote común final previsto: 245 − 85 = **160 €**.
 
-No es un registro de cobros realizados. Las jornadas 36–38 cuentan únicamente para la general. Un sprint solo se completa cuando existen datos de todos sus jugadores en todas sus jornadas. Si hay empate en el corte de pagos, queda pendiente el desempate entre amigos; el panel no inventa un criterio.
+No es un registro de cobros realizados. Las jornadas 36–38 cuentan únicamente para la general. Un sprint solo se completa cuando existen datos de todos sus jugadores en todas sus jornadas. En la general, los empates se ordenan alfabéticamente, se indican con «Empate» y mantienen el importe de cada posición consecutiva. Si hay empate en el corte de pagos de un sprint, queda pendiente el desempate entre amigos; el panel no inventa un criterio.
 
 ## Uso
 

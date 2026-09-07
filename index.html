@@ -396,7 +396,7 @@
 
 
       // Ranking total + barras
-      const totalArr = players.map(p => ({id:p.id, name:p.name, value: totals[p.id]})).sort((a,b)=>b.value-a.value);
+      const totalArr = players.map(p => ({id:p.id, name:p.name, value: totals[p.id]})).sort((a,b)=>b.value-a.value || a.name.localeCompare(b.name, 'es', {sensitivity:'base'}));
       const totalCompleted = filledAll >= seasonJ;
       els.pillTotal = $('#pillTotal');
       if (els.pillTotal) {
@@ -407,9 +407,9 @@
         const delta = (payoutsTotal[i] ?? 0);
         const chip = `<span class="pill ${delta<0?'bad':'good'}" title="Pago por puesto">${delta>0?'+':''}${delta}€</span>`;
         const tied = totalArr.filter(x=>x.value===t.value).length>1;
-        const extra = !filled ? '<span class="muted">Por empezar</span>' : tied ? '<span class="muted">Empate</span>' : totalCompleted ? chip : (chip + ' <span class="tag">(prov.)</span>');
+        const extra = !filled ? '<span class="muted">Por empezar</span>' : chip + `<span class="tag">${tied ? 'Empate' : ''}${!totalCompleted ? (tied ? ' · ' : '') + '(prov.)' : ''}</span>`;
         return `<li style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
-          <span>${filled ? totalArr.findIndex(x=>x.value===t.value)+1 : "—"}. ${esc(t.name)} <span class="tag">${t.value}</span></span>
+          <span>${filled ? i+1 : "—"}. ${esc(t.name)} <span class="tag">${t.value}</span></span>
           ${extra}
         </li>`;
       }).join("");
