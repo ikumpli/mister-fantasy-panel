@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mister Fantasy JK</title>
+  <title>Mister Fantasy JK · 2026-27</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -66,21 +66,32 @@
     .error { background:#3a1e2a; border:1px solid #5b2038; color:#ffd6e0; padding:10px; border-radius:10px; }
     .fileBtn { display:inline-block; padding:6px 10px; border:1px dashed var(--line); border-radius:10px; cursor:pointer; }
     a{ color: var(--accent2); }
+
+    :root{--bg:#0b1217;--card:#131e25;--line:#293840;--accent:#c2f76c;--accent2:#b6d7f1;--muted:#a6b7c0}
+    body{background:radial-gradient(ellipse at 90% 0, #233934 0,transparent 45%),var(--bg);font-size:16px}
+    .wrap{max-width:1240px;padding:32px 24px 50px} header{margin-bottom:28px;gap:20px} h1{font-size:clamp(26px,4vw,38px);letter-spacing:-1.5px;margin:6px 0 10px}.eyebrow{font-size:12px;letter-spacing:2px;color:var(--accent);font-weight:700}.logo-jk{background:var(--accent);color:#152019;transform:rotate(-5deg);padding:0 8px;border-radius:5px} .tag{font-size:14px;color:#b7cfc3}.muted,.note{font-size:14px;line-height:1.6}
+    button{font:inherit;color:inherit}.tabs{border:none;background:#101a21;padding:6px;gap:8px;overflow:auto}.tab{background:none;white-space:nowrap;font-size:14px;transition:background .2s,color .2s}.tab.active{background:var(--accent);color:#162019;font-weight:700;border-color:var(--accent)}button:focus-visible,a:focus-visible{outline:3px solid var(--accent2);outline-offset:3px}.tab:hover{background:#314239}.tab.active:hover{background:var(--accent)}
+    #kpiRow{padding:0;border:0;box-shadow:none;background:none;margin:20px 0!important}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.kpi{padding:20px;min-width:0;background:linear-gradient(135deg,#1a2931,#142128)}.kpi .v{font-size:30px;font-weight:700;letter-spacing:-1px}.pot-kpi{text-align:left;border-color:#678044;cursor:pointer}.pot-kpi .v{color:var(--accent)}
+    .grid{gap:18px;grid-template-columns:1.15fr 1fr}.card{padding:22px;border-radius:18px;box-shadow:0 12px 30px #0002}.card h3{font-size:18px;margin-top:0;margin-bottom:16px!important}.views{margin-top:22px}.view.active{animation:enter .25s ease-out}@keyframes enter{from{opacity:.4;transform:translateY(7px)}to{opacity:1;transform:none}}
+    #rankTotal{padding:0!important;gap:0!important;list-style:none}#rankTotal li{padding:13px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}#rankTotal li:last-child{border-bottom:0}#rankTotal li .tag{margin-left:10px}.pill{white-space:nowrap;font-size:12px;padding:5px 9px}.pill.good{background:var(--accent)}.pill.bad{background:#57353b;color:#ffd3da}.pill.warn{background:#423e27;color:#ffe5a4}
+    #bars{gap:13px!important}#bars>div>div:first-child{font-size:14px!important;margin-bottom:6px}.bar{height:8px;background:#25343d}.bar>span{background:linear-gradient(90deg,#64c9a2,var(--accent));transition:width .5s ease}.sprintGrid{gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.sprintGrid ol{padding:0!important;list-style:none}.sprintGrid li{padding:6px 0;font-size:14px}.sprintTitle{flex-wrap:wrap;gap:8px;margin-bottom:16px}
+    .pot{background:linear-gradient(145deg,#273d2b,#172820);border-color:#536c3b}.pot h2{font-size:28px;margin:24px 0 0}.pot-number{font-size:clamp(64px,9vw,100px);font-weight:700;letter-spacing:-5px;color:var(--accent);margin:14px 0}.pot p{line-height:1.6}.money-row{display:flex;justify-content:space-between;gap:20px;padding:15px 0;border-bottom:1px solid var(--line)}.money-row small{display:block;color:var(--muted);font-size:14px;margin-top:5px}.money-row b{white-space:nowrap}.money-row:last-child{border:0;color:var(--accent)}.rules-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.rule{background:#1b2a32;padding:14px;border-radius:10px}.rule span,.rule strong{display:block;font-size:14px}.rule strong{margin-top:8px}.reward{color:var(--accent)}table{font-size:14px}td,th{padding:12px}tbody td:first-child,thead th:first-child{position:sticky;left:0;background:var(--card);z-index:2}thead th:first-child{z-index:3}
+    @media(max-width:760px){.wrap{padding:22px 14px}header{align-items:start;flex-direction:column;gap:8px}.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.card{padding:18px}.rules-grid{grid-template-columns:repeat(2,1fr)}.sprintGrid{grid-template-columns:1fr}.kpi{padding:16px}.kpi .v{font-size:26px}}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>⚽ Mister Fantasy JK <span class="tag" id="seasonTag"></span></h1>
+      <div><h1>Mister Fantasy <span class="logo-jk">JK</span></h1><span class="tag" id="seasonTag"></span></div>
       <div class="muted" id="status">Cargando datos…</div>
     </header>
 
     <nav class="tabs" id="tabs">
-      <div class="tab active" data-tab="total">🏆 Liga General</div>
-      <div class="tab" data-tab="invierno">❄️ Invierno</div>
-      <div class="tab" data-tab="sprints">🚀 Sprints</div>
-      <div class="tab" data-tab="pagos">💶 Pagos</div>
-      <div class="tab" data-tab="tabla">📋 Jornadas</div>
+      <button type="button" class="tab active" data-tab="total">🏆 Liga General</button>
+      <button type="button" class="tab" data-tab="sprints">🚀 Sprints</button>
+      <button type="button" class="tab" data-tab="bote">💶 Bote</button>
+      <button type="button" class="tab" data-tab="tabla">📋 Jornadas</button>
     </nav>
 
     <!-- KPIs globales -->
@@ -88,7 +99,7 @@
       <div class="kpis">
         <div class="kpi"><div class="v" id="kpiJornadas">-</div><div class="muted">Jornadas con datos</div></div>
         <div class="kpi"><div class="v" id="kpiJugadores">-</div><div class="muted">Jugadores</div></div>
-        <div class="kpi"><div class="v" id="kpiTemporada">-</div><div class="muted">Temporada (J)</div></div>
+        <div class="kpi"><div class="v" id="kpiTemporada">-</div><div class="muted">Jornadas de liga</div></div><button class="kpi pot-kpi" onclick="document.querySelector('[data-tab=bote]').click()"><div class="v">160 € ↗</div><div class="muted">Bote común previsto</div></button>
       </div>
     </div>
 
@@ -98,33 +109,14 @@
         <div class="grid">
           <div class="card">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
-              <h3 style="margin:0 0 6px;">Clasificación Total</h3>
+              <h3 style="margin:0 0 6px;">Clasificación General</h3>
               <span id="pillTotal" class="pill warn">Provisional</span>
             </div>
-            <div class="muted" style="margin:-2px 0 8px;">Si la liga no ha terminado, los importes se muestran <em>como si acabara hoy</em>.</div>
             <ol id="rankTotal" style="padding-left:16px; margin:0; display:grid; gap:6px;"></ol>
           </div>
           <div class="card">
-            <h3 style="margin:0 0 6px;">Barras Totales</h3>
+            <h3 style="margin:0 0 6px;">Puntos totales</h3>
             <div id="bars" style="display:grid; gap:6px;"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- INVIERNO -->
-      <div class="view" id="view-invierno">
-        <div class="grid">
-          <div class="card">
-            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
-              <h3 style="margin:0 0 6px;">Campeonato de Invierno</h3>
-              <span id="pillWinter" class="pill warn">Pendiente</span>
-            </div>
-            <div class="muted">J1–<span id="winterTo">?</span></div>
-            <ol id="rankWinter" style="padding-left:16px; margin:4px 0 0; display:grid; gap:6px;"></ol>
-          </div>
-          <div class="card">
-            <h3 style="margin:0 0 6px;">Top Invierno (barras)</h3>
-            <div id="barsWinter" style="display:grid; gap:6px;"></div>
           </div>
         </div>
       </div>
@@ -135,22 +127,12 @@
         <p class="note" style="margin-top:8px;">En cada sprint, los últimos 4 jugadores pagan 5€.</p>
       </div>
 
-      <!-- PAGOS -->
-      <div class="view" id="view-pagos">
-        <div class="card">
-          <div class="sprintTitle">
-            <h3 style="margin:0">Pagos acumulados</h3>
-            <div class="muted" id="pagosEstado">Calculado con sprints completados</div>
-          </div>
-          <div class="muted" style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
-            <span>Archivo de pagos opcional: <code>mister-pagos.json</code></span>
-            <label class="fileBtn">Cargar
-              <input type="file" accept="application/json" style="display:none" onchange="loadPagosFromFile(this.files[0])">
-            </label>
-          </div>
-          <div id="pagosTableWrap" style="overflow:auto; border:1px solid var(--line); border-radius:12px;"></div>
-          <p class="note">Reglas: últimos 4 de cada sprint pagan 5€; Invierno y Total según tablas. Los importes de Invierno y Total se aplican cuando estén completados.</p>
+      <div class="view" id="view-bote">
+        <div class="grid">
+          <div class="card pot"><div class="eyebrow">PARA TODOS · AL FINAL DE TEMPORADA</div><h2>Bote común</h2><div class="pot-number" id="potTotal"></div><p>Después de repartir los premios de la general.</p><div id="potFormula"></div><p class="note">Previsión según las reglas. No representa dinero ya cobrado.</p></div>
+          <div class="card"><h3>De dónde sale el dinero</h3><div id="potBreakdown"></div></div>
         </div>
+        <div class="card" style="margin-top:16px"><h3>Premios y aportaciones de la general</h3><div id="generalRules" class="rules-grid"></div><p class="note">7 sprints de 5 jornadas. J36–J38 cuentan solo para la general. No hay campeonato ni pagos de invierno.</p></div>
       </div>
 
       <!-- TABLA JORNADAS -->
@@ -183,7 +165,7 @@
             <input type="file" accept="application/json" style="display:none" onchange="loadFromFile(this.files[0])">
           </label>
         </li>
-        <li>O ejecuta un servidor local: <code>python3 -m http.server</code> y abre <a href="#" onclick="alert('http://localhost:8000/panel-tabs.html')">http://localhost:8000/panel-tabs.html</a></li>
+        <li>O ejecuta un servidor local: <code>python3 -m http.server</code> y abre <a href="#" onclick="alert('http://localhost:8000/')">http://localhost:8000/</a></li>
       </ol>
     </div>
   </div>
@@ -272,40 +254,25 @@
       kpiTemporada: $('#kpiTemporada'),
       tableWrap: $('#tableWrap'),
       filledCount: $('#filledCount'),
-      winterTo: $('#winterTo'),
       rankTotal: $('#rankTotal'),
-      rankWinter: $('#rankWinter'),
       bars: $('#bars'),
-      barsWinter: $('#barsWinter'),
       sprintGrid: $('#sprintGrid'),
-      pagosTableWrap: $('#pagosTableWrap'),
-      pagosEstado: $('#pagosEstado'),
     };
 
-    // Reglas de pagos (según PDF)
-    const payoutsTotal = [55,30,0,-10,-10,-15,-15,-15,-20,-20,-20]; // 1..11
-    const payoutsWinter = [0,0,0,-5,-5,-5,-5,-10,-10,-10,-10]; // 1..11
+    // Reglas de la temporada 2026-27
+    const payoutsTotal = [55,30,0,-10,-10,-15,-15,-15,-20,-20]; // 1..10
     const sprintLoserCharge = -5; // para los 4 últimos de cada sprint
     const sprintDefs = [
       [1,5],[6,10],[11,15],[16,20],[21,25],[26,30],[31,35]
     ]; // últimas 3 jornadas no cuentan
 
     async function init(){
-      // intentamos cargar mister-pagos.json (opcional)
-      let pagosData = {};
-      try{
-        const r2 = await fetch('mister-pagos.json', {cache:'no-store'});
-        if(r2.ok){ pagosData = await r2.json(); statusEl.textContent += ' · Pagos cargados.'; }
-        else { statusEl.textContent += ' · Pagos no encontrados (0€).'; }
-      }catch(e){ statusEl.textContent += ' · Pagos no encontrados (0€).'; }
-
       try{
         const res = await fetch('mister-datos.json', {cache:'no-store'});
         if(!res.ok) throw new Error('HTTP '+res.status);
         const data = await res.json();
         statusEl.textContent = 'Datos cargados.';
-        const pagos = (window.__pagosOverride) ? window.__pagosOverride : (typeof pagosData==='object'?pagosData:{});
-        render(data, pagos);
+        render(data);
       }catch(e){
         statusEl.textContent = 'No se pudieron cargar los datos automáticamente.';
         fallback.style.display = 'block';
@@ -313,19 +280,8 @@
     }
 
 
-    function loadPagosFromFile(file){
-      const r = new FileReader();
-      r.onload = () => {
-        try{
-          window.__pagosOverride = JSON.parse(r.result);
-          alert('Pagos cargados. Recalcula la vista si no se ha actualizado automáticamente.');
-          init(); // recargar
-        }catch(e){ alert('Archivo de pagos no válido'); }
-      };
-      r.readAsText(file);
-    }
-
     function loadFromFile(file){
+      if(!file) return;
       const r = new FileReader();
       r.onload = () => {
         try{
@@ -333,7 +289,7 @@
           statusEl.textContent = 'Datos cargados desde archivo.';
           fallback.style.display = 'none';
           render(data);
-        }catch(e){ alert('Archivo no válido'); }
+        }catch(e){ alert(e.message || 'Archivo no válido'); }
       };
       r.readAsText(file);
     }
@@ -344,7 +300,7 @@
         const any = players.some(p => {
           const row = points[p.id] || [];
           const v = row[j];
-          return v !== '' && v !== null && v !== undefined && v !== undefined;
+          return hasPoint(v);
         });
         if(any) max = j+1;
       }
@@ -358,7 +314,7 @@
       for(let j=0; j<seasonJ; j++){
         const allHave = players.every(p => {
           const v = (points[p.id]||[])[j];
-          return v !== '' && v !== null && v !== undefined && !isNaN(Number(v));
+          return hasPoint(v);
         });
         if(allHave) nAll = j+1; else break;
       }
@@ -378,25 +334,18 @@
       }).sort((a,b)=> b.value - a.value);
     }
 
-    function render(data, pagos){
-      // pagos structure: { byId: {<playerId>: number} } OR flat {<playerId>: number}
-      function getPaidFor(id){
-        if(!pagos) return 0;
-        if(pagos.byId && typeof pagos.byId[id] === 'number') return Number(pagos.byId[id])||0;
-        if(typeof pagos[id] === 'number') return Number(pagos[id])||0;
-        return 0;
-      }
-
-      const { players, seasonJ, winterEnd, points } = data;
-      els.seasonTag.textContent = `Temporada: ${seasonJ} jornadas · Invierno hasta J${winterEnd}`;
-
+    function render(data){
+      const { players, seasonJ, points } = data;
+      if(data.season !== '2026-27' || players.length !== 10 || players.some(p => /^(jimmy|jaime)$/i.test(p.name))) throw new Error('Usa los datos de la temporada 2026-27 con sus 10 jugadores.');
+      els.seasonTag.textContent = `Temporada ${data.season}`;
       // KPIs y jornadas con datos
       const filled = computeFilledJ(points, players, seasonJ);
-      els.kpiJornadas.textContent = filled;
+      const count = Array.from({length:seasonJ},(_,j)=>players.some(p=>hasPoint(points[p.id]?.[j]))).filter(Boolean).length;
+      els.kpiJornadas.textContent = count;
       els.kpiJugadores.textContent = players.length;
       els.kpiTemporada.textContent = seasonJ;
-      els.filledCount.textContent = filled;
-      els.winterTo.textContent = winterEnd;
+      els.filledCount.textContent = count;
+
 
       // Tabla jornadas
       let html = '<table><thead><tr><th>Jugador</th>';
@@ -409,12 +358,13 @@
         html += `<tr><td>${esc(p.name)}</td>`;
         for(let j=0;j<seasonJ;j++){
           const v = row[j] ?? "";
-          html += `<td class="right">${v!==""?v:""}</td>`;
+          html += `<td class="right">${v!==""?esc(v):'—'}</td>`;
         }
         html += `<td class="right"><strong>${totals[p.id]}</strong></td></tr>`;
       });
       html += "</tbody></table>";
       els.tableWrap.innerHTML = html;
+      window.__chartObserver?.disconnect();
       // Cumulative chart
       const series = cumulativeSeries(points, players, seasonJ);
       const canvas = document.getElementById('cumChart');
@@ -422,7 +372,7 @@
       if (canvas){
         if(filledAll <= 0){
           const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
-          const msg = 'Aún no hay ninguna jornada con datos de TODOS los jugadores.';
+          const msg = 'Esperando la primera jornada completa.';
           canvas.width = canvas.parentElement.clientWidth || canvas.width;
           ctx.fillStyle = '#9aa4b2'; ctx.font = '14px Inter, ui-sans-serif'; ctx.fillText(msg, 16, 24);
         }else{
@@ -432,6 +382,7 @@
           if('ResizeObserver' in window){
             ro = new ResizeObserver(()=>drawCumChart(canvas, players, series, filledAll));
             ro.observe(canvas.parentElement);
+            window.__chartObserver = ro;
           }else{
             window.addEventListener('resize', ()=>drawCumChart(canvas, players, series, filledAll));
           }
@@ -446,50 +397,28 @@
 
       // Ranking total + barras
       const totalArr = players.map(p => ({id:p.id, name:p.name, value: totals[p.id]})).sort((a,b)=>b.value-a.value);
-      const totalCompleted = filled >= seasonJ;
+      const totalCompleted = filledAll >= seasonJ;
+      els.pillTotal = $('#pillTotal');
       if (els.pillTotal) {
-        els.pillTotal.textContent = totalCompleted ? 'Aplicado' : 'Provisional';
+        els.pillTotal.textContent = totalCompleted ? 'Final' : filled ? 'Provisional' : 'Sin empezar';
         els.pillTotal.className = 'pill ' + (totalCompleted ? 'good' : 'warn');
       }
       els.rankTotal.innerHTML = totalArr.map((t,i)=>{
         const delta = (payoutsTotal[i] ?? 0);
         const chip = `<span class="pill ${delta<0?'bad':'good'}" title="Pago por puesto">${delta>0?'+':''}${delta}€</span>`;
-        const extra = totalCompleted ? chip : (chip + ' <span class="tag">(prov.)</span>');
+        const tied = totalArr.filter(x=>x.value===t.value).length>1;
+        const extra = !filled ? '<span class="muted">Por empezar</span>' : tied ? '<span class="muted">Empate</span>' : totalCompleted ? chip : (chip + ' <span class="tag">(prov.)</span>');
         return `<li style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
-          <span>${i+1}. ${esc(t.name)} <span class="tag">${t.value}</span></span>
+          <span>${filled ? totalArr.findIndex(x=>x.value===t.value)+1 : "—"}. ${esc(t.name)} <span class="tag">${t.value}</span></span>
           ${extra}
         </li>`;
       }).join("");
       const maxVal = Math.max(1, ...totalArr.map(t=>t.value));
-      els.bars.innerHTML = totalArr.map(t => {
+      els.bars.innerHTML = totalArr.map((t,i) => {
         const pct = Math.round((t.value / maxVal) * 100);
         return `<div>
           <div style="display:flex;justify-content:space-between;font-size:12px"><span>${esc(t.name)}</span><span class="tag">${t.value}</span></div>
-          <div class="bar"><span style="width:${pct}%"></span></div>
-        </div>`;
-      }).join("");
-
-      // Invierno
-      const wEnd = Math.min(winterEnd, seasonJ);
-      const winterArr = totalsByRange(points, players, 1, wEnd);
-      const winterCompleted = filled >= wEnd;
-      if (els.pillWinter) {
-        els.pillWinter.textContent = winterCompleted ? 'Aplicado' : 'Pendiente';
-        els.pillWinter.className = 'pill ' + (winterCompleted ? 'good' : 'warn');
-      }
-      els.rankWinter.innerHTML = winterArr.map((t,i)=>{
-        const delta = (payoutsWinter[i] ?? 0);
-        const showDelta = winterCompleted ? `<span class=\"pill ${delta<0?'bad':'good'}\">${delta>0?'+':''}${delta}€</span>` : '<span class=\"tag\">(pendiente)</span>';
-        return `<li style=\"display:flex;align-items:center;gap:8px;justify-content:space-between;\">`
-          + `<span>${i+1}. ${esc(t.name)} <span class=\"tag\">${t.value}</span></span>`
-          + showDelta + `</li>`;
-      }).join("");
-      const wMax = Math.max(1, ...winterArr.map(t=>t.value));
-      els.barsWinter.innerHTML = winterArr.map(t=>{
-        const pct = Math.round((t.value/wMax)*100);
-        return `<div>
-          <div style=\"display:flex;justify-content:space-between;font-size:12px\"><span>${esc(t.name)}</span><span class=\"tag\">${t.value}</span></div>
-          <div class=\"bar\"><span style=\"width:${pct}%\"></span></div>
+          <div class="bar"><span style="width:${Math.max(0,pct)}%;background:${palette[players.findIndex(p=>p.id===t.id)]}"></span></div>
         </div>`;
       }).join("");
 
@@ -500,111 +429,47 @@
         const [a,b] = def;
         const arr = totalsByRange(points, players, a, b);
         const losers = arr.slice(-4).map(x=>x.id);
-        const completed = filled >= b; // sprint completo si tenemos todas sus jornadas
+        const completed = Array.from({length:b-a+1},(_,j)=>a+j-1).every(j=>players.every(p=>hasPoint(points[p.id]?.[j])));
+        const started = players.some(p=>(points[p.id]||[]).slice(a-1,b).some(hasPoint));
+        const tiedCutoff = arr.length>4 && arr[arr.length-5].value===arr[arr.length-4].value;
         if(completed) completedSprints.push(idx);
         sprintsHtml.push(`
           <div class="card">
             <div class="sprintTitle">
               <h3 style="margin:0">Sprint ${idx+1} · J${a}–J${b}</h3>
-              <span class="pill ${completed ? 'good' : 'warn'}">${completed ? 'Completado' : 'En curso'}</span>
+              <span class="pill ${completed ? 'good' : 'warn'}">${completed ? 'Completado' : started ? 'En curso' : 'Pendiente'}</span>
             </div>
             <ol style="padding-left:16px; margin:0; display:grid; gap:4px;">
               ${arr.map((t,i)=>{
-                const last = losers.includes(t.id);
-                return `<li>${i+1}. ${esc(t.name)} <span class="tag">${t.value}</span> ${last?'<span class="flag-bottom">paga 5€</span>':''}</li>`;
+                const last = started && !tiedCutoff && losers.includes(t.id);
+                return `<li>${started ? arr.findIndex(x=>x.value===t.value)+1 : "—"}. ${esc(t.name)} <span class="tag">${t.value}</span> ${last?`<span class="flag-bottom">${completed?'paga':'provisional'} 5€</span>`:''}</li>`;
               }).join("")}
             </ol>
+            ${started && tiedCutoff ? '<p class="note">Empate en el corte: pendientes de decidir los 4 que pagan.</p>' : ''}
           </div>
         `);
       });
       els.sprintGrid.innerHTML = sprintsHtml.join("");
 
-      // Pagos
-      const payments = {}; // id -> number
-      players.forEach(p=>payments[p.id]=0);
-
-      // Sprints terminados: últimos 4 pagan -5
-      sprintDefs.forEach((def, idx) => {
-        const [a,b] = def;
-        if(filled >= b){
-          const arr = totalsByRange(points, players, a, b);
-          arr.slice(-4).forEach(t => { payments[t.id] += sprintLoserCharge; });
-        }
-      });
-
-      // Invierno: aplicar si completado
-      const winterCompleted2 = filled >= wEnd;
-      if(winterCompleted2){
-        winterArr.forEach((t, i) => {
-          const delta = payoutsWinter[i] ?? 0;
-          payments[t.id] += delta;
-        });
-      }
-
-      // Total: aplicar si temporada completa
-      const totalCompleted2 = filled >= seasonJ;
-      if(totalCompleted2){
-        totalArr.forEach((t, i) => {
-          const delta = payoutsTotal[i] ?? 0;
-          payments[t.id] += delta;
-        });
-      }
-
-      els.pagosEstado.textContent = `Sprints aplicados: ${sprintDefs.filter(([a,b])=>filled>=b).length}/${sprintDefs.length} · ` +
-        `Invierno: ${winterCompleted2?'aplicado':'pendiente'} · Liga General: ${totalCompleted2?'aplicado':'pendiente'}`;
-
-      // Tabla de pagos detallada
-      const header = ['Jugador','Por sprints (€)','Invierno (€)','Liga General (€)','Dinero pagado (€)','Acumulado (€)'];
-      let pagosHtml = '<table><thead><tr>' + header.map(h=>`<th>${h}</th>`).join('') + '</tr></thead><tbody>';
-      // recomputar partes para mostrar detalle por jugador
-      const byId = id => players.find(p=>p.id===id)?.name || id;
-
-      // detalle sprints por jugador
-      const sprintCharges = {}; players.forEach(p=>sprintCharges[p.id]=0);
-      sprintDefs.forEach(([a,b])=>{
-        if(filled>=b){
-          const arr = totalsByRange(points, players, a, b);
-          arr.slice(-4).forEach(t => { sprintCharges[t.id] += sprintLoserCharge; });
-        }
-      });
-
-      const winterCharges = {}; players.forEach(p=>winterCharges[p.id]=0);
-      if(winterCompleted2){
-        winterArr.forEach((t,i)=>{
-          winterCharges[t.id] += payoutsWinter[i] ?? 0;
-        });
-      }
-      const totalCharges = {}; players.forEach(p=>totalCharges[p.id]=0);
-      if(totalCompleted2){
-        totalArr.forEach((t,i)=>{
-          totalCharges[t.id] += payoutsTotal[i] ?? 0;
-        });
-      }
-
-      const orderByDebt = players.map(p=>{
-        const acc = payments[p.id]||0;
-        return {id:p.id, name:p.name, acc};
-      }).sort((a,b)=> a.acc - b.acc); // más negativo primero
-
-      orderByDebt.forEach(r=>{
-        const s = sprintCharges[r.id]||0;
-        const w = winterCharges[r.id]||0;
-        const t = totalCharges[r.id]||0;
-        const acc = s+w+t;
-        const cls = acc<0?'bad':(acc>0?'good':'');
-        const paid = getPaidFor(r.id);
-        pagosHtml += `<tr>
-          <td>${esc(r.name)}</td>
-          <td class="right">${euro(s)}</td>
-          <td class="right">${euro(w)}</td>
-          <td class="right">${euro(t)}</td>
-          <td class="right">${euro(paid)}</td>
-          <td class="right"><strong class="${cls}">${euro(acc)}</strong></td>
-        </tr>`;
-      });
-      pagosHtml += '</tbody></table>';
-      els.pagosTableWrap.innerHTML = pagosHtml;
+      const sprintIncome = sprintDefs.length * 4 * Math.abs(sprintLoserCharge);
+      const generalIncome = -sum(payoutsTotal.filter(v=>v<0));
+      const prizes = sum(payoutsTotal.filter(v=>v>0));
+      const income = sprintIncome + generalIncome;
+      const money = v => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(v);
+      $('#potTotal').textContent = money(income-prizes);
+      $('.pot-kpi .v').textContent = money(income-prizes)+' ↗';
+      $('#potFormula').textContent = `${money(income)} recaudados − ${money(prizes)} en premios`;
+      $('#potBreakdown').innerHTML = [
+        ['Sprints',`7 × 4 jugadores × 5 €`,sprintIncome],
+        ['General','2 × 10 € + 3 × 15 € + 2 × 20 €',generalIncome],
+        ['Recaudación total prevista','Sprints + general',income],
+        ['Premios','1.º: 55 € · 2.º: 30 €',-prizes],
+        ['Bote para todos','Equivale a 16 € por participante; se conserva como bote común.',income-prizes]
+      ].map(([label,detail,value])=>`<div class="money-row"><div><strong>${label}</strong><small>${detail}</small></div><b>${money(value)}</b></div>`).join('');
+      $('#generalRules').innerHTML = payoutsTotal.map((v,i)=>`<div class="rule"><span>${i+1}.º puesto</span><strong class="${v>0?'reward':''}">${v>0?'Gana ':v<0?'Aporta ':''}${money(Math.abs(v))}</strong></div>`).join('');
     }
+
+    function hasPoint(v){return v!==null && v!==undefined && v!=='' && Number.isFinite(Number(v));}
 
     init();
   </script>
