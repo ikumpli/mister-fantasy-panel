@@ -20,23 +20,23 @@ Publicar `index.html` y `mister-datos.json` juntos en el alojamiento existente, 
 
 También se puede abrir `index.html` con doble clic y seleccionar `mister-datos.json` cuando el navegador lo solicite. Editar los puntos en el JSON, manteniendo el identificador de temporada `2026-27`. El antiguo archivo de pagos ya no se utiliza.
 
-## Automatización: investigación del 7 de septiembre de 2026
+## Sincronización automática
 
-No he localizado documentación oficial de una API pública o exportación de resultados para ligas privadas en la web y el centro de ayuda consultados:
+El importador de Node.js y Playwright lee la liga **Juan hacker** y prepara los puntos en una vista previa antes de publicarlos. El flujo de GitHub Actions puede ejecutarlo cada día y desplegar el JSON validado en GitHub Pages.
 
-- https://www.playmister.com/es/
-- https://help.playmister.com/
+**La sincronización está desactivada por defecto y aún requiere una prueba autenticada.** No hay contraseñas ni sesiones en el repositorio. La sesión se crea en un navegador independiente, se guarda en una carpeta privada excluida de Git y, después de verificarla, se puede subir como secreto de GitHub Actions.
 
-Existe un proyecto independiente, MisterFantasyExcel, que utiliza una sesión de Chrome para obtener clasificación y eventos de una liga privada:
+Sigue [SETUP.md](SETUP.md) para iniciar sesión, revisar una jornada, probar el proceso completo y activar la programación. La web muestra la fecha de la última sincronización. Las jornadas reabiertas o con partidos aplazados mantienen sus puntos anteriores y sus sprints quedan provisionales.
 
-- https://github.com/JoaquinBeas/MisterFantasyExcel
-- https://github.com/JoaquinBeas/MisterFantasyExcel/blob/master/mister_client.py
+```sh
+npm ci
+npm run browser:install
+npm run mister:login
+npm run mister:preview -- --round 4
+npm test
+```
 
-El código realiza peticiones autenticadas a `/standings` y `/ajax/feed`. Es evidencia de una posible integración mediante las llamadas internas de la web; no constituye una API oficial ni prueba de que los puntos históricos por jornada se puedan recuperar actualmente.
-
-La siguiente fase sería comprobar, con la sesión iniciada del usuario, cómo carga Mister la clasificación de una jornada y adaptar un importador que genere el JSON de este panel. Debe verificar temporada, liga, participantes y jornadas completas, permitir actualizar correcciones de puntos y guardar los datos de acceso fuera del panel y de cualquier alojamiento público. Alternativamente, se puede leer la clasificación visible con automatización de navegador.
-
-No se ha accedido a la cuenta de Mister, las jornadas 1–4 se han transcrito manualmente desde capturas de 2026-27 y no se ha activado ninguna sincronización. La investigación solicitada queda separada de una futura implementación.
+La investigación y la prueba visual del 22 de septiembre confirmaron los diez participantes y diferencias entre la J4 visible y el JSON manual. Los puntos del archivo original no se han sustituido. El importador usa interfaces internas de Mister y debe detenerse si su formato cambia o la sesión caduca.
 
 ## Nombres en las capturas
 

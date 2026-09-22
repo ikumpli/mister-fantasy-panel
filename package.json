@@ -1,0 +1,16 @@
+{
+  "name": "mister-fantasy-panel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test",
+    "browser:install": "playwright install chromium",
+    "mister:login": "node scripts/mister-login.mjs",
+    "mister:preview": "node scripts/sync-mister.mjs",
+    "mister:apply": "node scripts/apply-candidate.mjs",
+    "site:build": "node scripts/build-site.mjs"
+  },
+  "dependencies": { "playwright": "1.63.0" }
+}

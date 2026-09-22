@@ -1,0 +1,9 @@
+node_modules/
+playwright/.auth/
+.sync/
+_site/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log

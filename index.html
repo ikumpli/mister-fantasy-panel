@@ -309,14 +309,14 @@
     }
 
     // Jornadas completas: todas las personas tienen un número válido en esa jornada
-    function computeFilledAll(points, players, seasonJ){
+    function computeFilledAll(points, players, seasonJ, syncedRounds){
       let nAll = 0;
       for(let j=0; j<seasonJ; j++){
         const allHave = players.every(p => {
           const v = (points[p.id]||[])[j];
           return hasPoint(v);
         });
-        if(allHave) nAll = j+1; else break;
+        if(allHave && (!syncedRounds || syncedRounds[j+1]?.status === 'closed')) nAll = j+1; else break;
       }
       return nAll;
     }
@@ -337,6 +337,13 @@
     function render(data){
       const { players, seasonJ, points } = data;
       if(data.season !== '2026-27' || players.length !== 10 || players.some(p => /^(jimmy|jaime)$/i.test(p.name))) throw new Error('Usa los datos de la temporada 2026-27 con sus 10 jugadores.');
+      if(data.sync?.lastSuccessfulSync){
+        const updated = new Date(data.sync.lastSuccessfulSync);
+        if(Number.isFinite(updated.getTime())){
+          const stale = Date.now() - updated.getTime() > 72*60*60*1000;
+          statusEl.textContent = `Última sincronización: ${updated.toLocaleString('es-ES')}${stale ? ' · Datos sin actualizar' : ''}`;
+        }
+      }
       els.seasonTag.textContent = `Temporada ${data.season}`;
       // KPIs y jornadas con datos
       const filled = computeFilledJ(points, players, seasonJ);
@@ -368,7 +375,7 @@
       // Cumulative chart
       const series = cumulativeSeries(points, players, seasonJ);
       const canvas = document.getElementById('cumChart');
-      const filledAll = computeFilledAll(points, players, seasonJ);
+      const filledAll = computeFilledAll(points, players, seasonJ, data.sync?.rounds);
       if (canvas){
         if(filledAll <= 0){
           const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -429,7 +436,8 @@
         const [a,b] = def;
         const arr = totalsByRange(points, players, a, b);
         const losers = arr.slice(-4).map(x=>x.id);
-        const completed = Array.from({length:b-a+1},(_,j)=>a+j-1).every(j=>players.every(p=>hasPoint(points[p.id]?.[j])));
+        const completed = Array.from({length:b-a+1},(_,j)=>a+j-1).every(j=>
+          players.every(p=>hasPoint(points[p.id]?.[j])) && (!data.sync || data.sync.rounds?.[j+1]?.status === 'closed'));
         const started = players.some(p=>(points[p.id]||[]).slice(a-1,b).some(hasPoint));
         const tiedCutoff = arr.length>4 && arr[arr.length-5].value===arr[arr.length-4].value;
         if(completed) completedSprints.push(idx);

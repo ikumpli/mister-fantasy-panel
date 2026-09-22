@@ -1,0 +1,100 @@
+name: Sync Mister points
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish validated points to the panel
+        type: boolean
+        default: false
+  schedule:
+    - cron: '17 8 * * *'
+
+# The daily job does nothing until MISTER_SYNC_ENABLED is set to true.
+permissions:
+  contents: read
+concurrency:
+  group: mister-points-sync
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    if: github.event_name == 'workflow_dispatch' || vars.MISTER_SYNC_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - name: Read and validate Mister scores
+        run: npm run mister:preview
+        env:
+          MISTER_STORAGE_STATE: ${{ secrets.MISTER_STORAGE_STATE }}
+      - name: Save the score preview (no browser state)
+        uses: actions/upload-artifact@v4
+        with:
+          name: mister-preview
+          path: |
+            .sync/candidate.json
+            .sync/report.json
+            .sync/summary.md
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+      - name: Explain a failed import
+        if: failure()
+        run: |
+          echo '## Mister no se ha actualizado' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Se conserva el último JSON válido. Consulta el error: puede requerir renovar MISTER_STORAGE_STATE o adaptar el importador a un cambio de Mister.' >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    needs: preview
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'schedule' || inputs.publish == true)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: mister-preview
+          path: .sync
+      # Select Settings > Pages > Source > GitHub Actions before the first publication.
+      - uses: actions/configure-pages@v5
+      - name: Apply the validated candidate
+        run: node scripts/apply-candidate.mjs
+      - name: Save a versioned copy of the points
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- mister-datos.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update validated Mister points'
+            git push origin HEAD:main
+          fi
+      - name: Build public files only
+        run: node scripts/build-site.mjs
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      # A GITHUB_TOKEN commit does not trigger a separate Pages workflow.
+      - name: Publish the panel
+        id: deploy
+        uses: actions/deploy-pages@v4

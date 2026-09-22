@@ -1,0 +1,20 @@
+{
+  "leagueId": "695985",
+  "leagueName": "Juan hacker",
+  "season": "2026-27",
+  "seasonJ": 38,
+  "seasonAnchors": { "1": "3968", "4": "4045" },
+  "expectedMatchesPerRound": 10,
+  "managerIds": {
+    "Iñ": "5096329",
+    "Eg": "13416358",
+    "Vi": "5091406",
+    "Cu": "5091216",
+    "Ma": "10395615",
+    "Ch": "12129898",
+    "Za": "5093520",
+    "Al": "10399319",
+    "Ju": "5091443",
+    "El": "5091199"
+  }
+}

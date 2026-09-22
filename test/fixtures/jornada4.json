@@ -1,0 +1,95 @@
+{
+  "description": "Scores observed in the signed-in Mister Jornada 4 page on 2026-09-22. Closure was not independently verified. Link texts are normalized test records, not an HTML dump.",
+  "rows": [
+    {
+      "panelId": "Iñ",
+      "panelName": "Iñaki",
+      "misterName": "Uriarte",
+      "misterManagerId": "5096329",
+      "savedPoints": 25,
+      "observedPoints": 29,
+      "difference": 4
+    },
+    {
+      "panelId": "Eg",
+      "panelName": "Egoitz",
+      "misterName": "Egoitzius07",
+      "misterManagerId": "13416358",
+      "savedPoints": 31,
+      "observedPoints": 41,
+      "difference": 10
+    },
+    {
+      "panelId": "Vi",
+      "panelName": "Villar",
+      "misterName": "Axier Villar Martinez",
+      "misterManagerId": "5091406",
+      "savedPoints": 61,
+      "observedPoints": 61,
+      "difference": 0
+    },
+    {
+      "panelId": "Cu",
+      "panelName": "Cumpli",
+      "misterName": "cumpli",
+      "misterManagerId": "5091216",
+      "savedPoints": 37,
+      "observedPoints": 37,
+      "difference": 0
+    },
+    {
+      "panelId": "Ma",
+      "panelName": "Mayo",
+      "misterName": "Markel",
+      "misterManagerId": "10395615",
+      "savedPoints": 28,
+      "observedPoints": 42,
+      "difference": 14
+    },
+    {
+      "panelId": "Ch",
+      "panelName": "Chigrin",
+      "misterName": "Chigrin",
+      "misterManagerId": "12129898",
+      "savedPoints": 22,
+      "observedPoints": 30,
+      "difference": 8
+    },
+    {
+      "panelId": "Za",
+      "panelName": "Zarra",
+      "misterName": "unai",
+      "misterManagerId": "5093520",
+      "savedPoints": 24,
+      "observedPoints": 26,
+      "difference": 2
+    },
+    {
+      "panelId": "Al",
+      "panelName": "Alan",
+      "misterName": "Alan Torrontegui Barona",
+      "misterManagerId": "10399319",
+      "savedPoints": 16,
+      "observedPoints": 16,
+      "difference": 0
+    },
+    {
+      "panelId": "Ju",
+      "panelName": "Juan",
+      "misterName": "Juanan FC",
+      "misterManagerId": "5091443",
+      "savedPoints": 38,
+      "observedPoints": 38,
+      "difference": 0
+    },
+    {
+      "panelId": "El",
+      "panelName": "Eleder",
+      "misterName": "Eleder Bacelo",
+      "misterManagerId": "5091199",
+      "savedPoints": 36,
+      "observedPoints": 47,
+      "difference": 11
+    }
+  ]
+}
