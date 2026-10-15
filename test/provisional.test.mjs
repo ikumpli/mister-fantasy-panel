@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
-import { readJson, roundState, roundHasScores, mergeRounds } from '../scripts/sync-core.mjs';
+import { readJson, roundState, roundHasScores, roundProgress, mergeRounds } from '../scripts/sync-core.mjs';
 import { collectRounds } from '../scripts/mister-client.mjs';
 
 const config = await readJson(new URL('../mister-sync.config.json', import.meta.url));
@@ -69,13 +69,19 @@ function browserFixture(meta, mismatch = false) {
 test('collector cross-checks provisional standings against all ten histories', async () => {
   const fixture = browserFixture(metadata());
   const result = await collectRounds(fixture.page, config, 6);
-  assert.deepEqual(result, [{round:6,id:'4047',state:'pending',points:scores}]);
+  assert.deepEqual(result, [{round:6,id:'4047',state:'pending',points:scores,progress:roundProgress(metadata())}]);
   assert.ok(fixture.visited.some(url=>url.endsWith('standings?gw=4047')));
   await assert.rejects(collectRounds(browserFixture(metadata(),true).page, config, 6), /no coinciden/);
   const future = metadata(); future.games.forEach(g=>g.status='scheduled');
   const untouched = browserFixture(future);
-  assert.deepEqual(await collectRounds(untouched.page,config,6), [{round:6,id:'4047',state:'pending'}]);
+  assert.deepEqual(await collectRounds(untouched.page,config,6), [{round:6,id:'4047',state:'pending',progress:roundProgress(future)}]);
   assert.ok(!untouched.visited.some(url=>url.endsWith('standings?gw=4047')));
+});
+
+test('preview diagnostics contain only recognized statuses and match counts', () => {
+  assert.deepEqual(roundProgress(metadata()),{misterStatus:'ongoing',matches:{played:7,postponed:3}});
+  assert.deepEqual(roundProgress({gameweekStatus:'private-payload',games:[{status:'private-payload',token:'secret'}]}),
+    {misterStatus:'unknown',matches:{unknown:1}});
 });
 
 test('dashboard includes provisional points in totals and chart while keeping sprint payments provisional', async () => {

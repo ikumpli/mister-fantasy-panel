@@ -118,6 +118,19 @@ export function roundHasScores(data, config) {
   return states.some(s => progressed.includes(s));
 }
 
+export function roundProgress(data) {
+  // Only fixed status labels and counts enter the public preview, never API payloads.
+  const allowed = ['closed', 'finished', 'played', 'ongoing', 'playing', 'live', 'in_progress',
+    'unstarted', 'pending', 'scheduled', 'fixture', 'postponed', 'suspended'];
+  const safeStatus = value => allowed.includes(statusName(value)) ? statusName(value) : 'unknown';
+  const matches = {};
+  for (const game of Array.isArray(data.games) ? data.games : []) {
+    const status = safeStatus(game.status);
+    matches[status] = (matches[status] || 0) + 1;
+  }
+  return { misterStatus: safeStatus(data.gameweekStatus), matches };
+}
+
 export function mergeRounds(panel, config, rounds, now = new Date().toISOString()) {
   validatePanel(panel, config);
   check(Array.isArray(rounds) && rounds.length > 0, 'No se han comprobado jornadas.');

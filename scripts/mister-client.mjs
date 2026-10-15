@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import path from 'node:path';
-import { BASE_URL, SyncError, check, readJson, roundLinks, standingsRows, validateHistory, roundState, roundHasScores } from './sync-core.mjs';
+import { BASE_URL, SyncError, check, readJson, roundLinks, standingsRows, validateHistory, roundState, roundHasScores, roundProgress } from './sync-core.mjs';
 
 export const SESSION_FILE = 'playwright/.auth/mister.json';
 export function getSessionFile(env = process.env) {
@@ -126,8 +126,9 @@ export async function collectRounds(page, config, requestedRound) {
   for (const round of selected) {
     const metadata = await api(page, '/ajax/sw/gameweek', { post: 'gameweek', id: round.id, comments: '0' });
     const state = roundState(metadata, config);
+    const progress = roundProgress(metadata);
     if (!roundHasScores(metadata, config)) {
-      rounds.push({ ...round, state });
+      rounds.push({ ...round, state, progress });
       continue;
     }
     const points = await openStandings(page, config, round.id);
@@ -138,7 +139,7 @@ export async function collectRounds(page, config, requestedRound) {
       check(String(history?.id_gameweek) === round.id && Number.isSafeInteger(value) && value === points[id],
         `J${round.round}: la tabla y el historial no coinciden. Reintenta cuando termine la actualización de Mister.`);
     }
-    rounds.push({ ...round, state, points });
+    rounds.push({ ...round, state, points, progress });
   }
   return rounds;
 }

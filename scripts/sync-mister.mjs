@@ -24,14 +24,14 @@ async function main() {
       schema: 1, checkedAt: output.sync.lastSuccessfulSync, sourceSha256: hash(source),
       configSha256: hash(configSource), candidateSha256: hash(candidate),
       fullSeasonCheck: requested === undefined,
-      checkedRounds: rounds.map(r => ({ round: r.round, gameweekId: r.id, state: r.state })), changes
+      checkedRounds: rounds.map(r => ({ round: r.round, gameweekId: r.id, state: r.state, ...r.progress })), changes
     };
     const summary = [
       '# Vista previa Mister', '',
       `${rounds.length} jornadas comprobadas; ${changes.length} puntuaciones nuevas o corregidas.`,
       'Las jornadas empezadas incluyen puntos provisionales, contrastados con el historial. Los sprints no se cierran hasta que terminen todos sus partidos.', '',
-      '| Jornada | Estado | Puntos comprobados |', '|---|---|---|',
-      ...rounds.map(r => `| J${r.round} | ${r.state === 'closed' ? 'Cerrada' : r.points ? 'Provisional' : 'Pendiente'} | ${r.points ? 'Sí' : 'No; se conservan los anteriores'} |`), '',
+      '| Jornada | Estado | Puntos comprobados | Estado en Mister | Partidos por estado |', '|---|---|---|---|---|',
+      ...rounds.map(r => `| J${r.round} | ${r.state === 'closed' ? 'Cerrada' : r.points ? 'Provisional' : 'Pendiente'} | ${r.points ? 'Sí' : 'No; se conservan los anteriores'} | ${r.progress.misterStatus} | ${Object.entries(r.progress.matches).map(([s,n])=>`${s}: ${n}`).join(', ') || 'Sin detalle'} |`), '',
       '| Participante | Jornada | Antes | Mister |', '|---|---|---|---|',
       ...changes.map(c => `| ${c.player} | J${c.round} | ${c.before ?? 'Pendiente'} | ${c.after} |`), '',
       'El panel original no se ha modificado. La publicación requiere un paso separado.', ''
