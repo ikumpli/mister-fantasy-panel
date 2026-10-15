@@ -2,7 +2,7 @@
 
 This importer is configured for **Juan hacker**, league `695985`, and the ten participants in the existing panel. It reads Mister's website and internal endpoints using a saved browser session. It does not store your password, place bids, change lineups, invite users, or post messages.
 
-**Current state: code and offline tests are ready for a live trial. No account session has been exported, no secret has been uploaded, and scheduled publishing is disabled.** Reading the league in Firefox confirmed the participant IDs and J4 standings. The new Playwright importer still needs its own authenticated live test, including the internal round-status response.
+**The repository's daily synchronization is active.** The 14 October 2026 scheduled run successfully checked eight rounds and deployed the panel. For a fresh installation, follow the authenticated setup below before enabling scheduled publishing. A successful sync does not mean every round is final: check the per-round state in the preview and the provisional markers on the panel.
 
 ## 1. Install and sign in once
 
@@ -96,10 +96,10 @@ Enable GitHub Actions failure notifications for your account/repository if you w
 - The ten stable manager IDs must match; changing a nickname does not move points to another person.
 - J1 and J4 are pinned to the actual gameweek IDs observed in the current league, preventing an automatic season rollover. IDs are discovered from links, never calculated by adding the jornada number.
 - All available jornadas are rechecked on every complete run, including old corrections and postponed fixtures.
-- A round must have an explicit recognized completed state and all ten fixtures marked played. Unknown response shapes abort the run. Closed rounds containing postponed fixtures remain provisional.
+- A round must have an explicit recognized completed state and all ten fixtures marked played before it can settle a sprint. Unknown response shapes abort the run. Closed rounds containing postponed fixtures remain provisional.
 - Standings points must agree with each manager's historical total for that exact gameweek ID. The importer does not reconstruct points from footballers or differences between season totals.
 - Zero and negative scores remain valid; missing scores are never turned into zero.
-- A reopened round keeps its last recorded scores, but the dashboard marks its sprint incomplete until it settles again. New incomplete rounds remain `null`.
+- Started rounds import provisional points with the same ten-manager table/history checks as closed rounds. Explicit match progress is required; future rounds and rounds with every match postponed remain `null` unless previously imported. A reopened round can update verified scores but keeps its last values when no match progress can be verified. The dashboard marks provisional rounds with `*`, includes them in totals and the chart, and keeps their sprints incomplete until all rounds close.
 - All fetching and validation finishes before a candidate is created. A failed collection leaves the published data unchanged. Only `index.html`, `mister-datos.json` and `.nojekyll` are included in the site artifact.
 
 ## Session expiry and recovery

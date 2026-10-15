@@ -101,6 +101,36 @@ export function roundState(data, config) {
   return states.every(s => ['played', 'finished', 'closed'].includes(s)) ? 'closed' : 'pending';
 }
 
+// A pending round can already have valid points (live or postponed fixtures).
+// Require explicit match progress before importing it, so future 0–0 tables stay empty.
+export function roundHasScores(data, config) {
+  if (roundState(data, config) === 'closed') return true;
+  if (!Array.isArray(data.games) || data.games.length === 0) return false;
+  check(data.games.length === config.expectedMatchesPerRound,
+    'No se pudieron verificar todos los partidos de una jornada pendiente.');
+  const ids = data.games.map(g => String(g.id ?? g.id_match ?? ''));
+  check(ids.every(id => /^\d+$/.test(id)) && new Set(ids).size === ids.length,
+    'Partidos ausentes o duplicados.');
+  const states = data.games.map(g => statusName(g.status));
+  const progressed = ['played', 'finished', 'closed', 'ongoing', 'playing', 'live', 'in_progress'];
+  const known = [...progressed, 'fixture', 'scheduled', 'postponed', 'suspended'];
+  check(states.every(s => known.includes(s)), 'Estado de partido desconocido; se cancela la actualización.');
+  return states.some(s => progressed.includes(s));
+}
+
+export function roundProgress(data) {
+  // Only fixed status labels and counts enter the public preview, never API payloads.
+  const allowed = ['closed', 'finished', 'played', 'ongoing', 'playing', 'live', 'in_progress',
+    'unstarted', 'pending', 'scheduled', 'fixture', 'postponed', 'suspended'];
+  const safeStatus = value => allowed.includes(statusName(value)) ? statusName(value) : 'unknown';
+  const matches = {};
+  for (const game of Array.isArray(data.games) ? data.games : []) {
+    const status = safeStatus(game.status);
+    matches[status] = (matches[status] || 0) + 1;
+  }
+  return { misterStatus: safeStatus(data.gameweekStatus), matches };
+}
+
 export function mergeRounds(panel, config, rounds, now = new Date().toISOString()) {
   validatePanel(panel, config);
   check(Array.isArray(rounds) && rounds.length > 0, 'No se han comprobado jornadas.');
@@ -114,7 +144,8 @@ export function mergeRounds(panel, config, rounds, now = new Date().toISOString(
     seen.add(item.round);
     check(item.state === 'closed' || item.state === 'pending', 'Estado de jornada inválido.');
     statuses[item.round] = { gameweekId: item.id, status: item.state };
-    if (item.state !== 'closed') continue; // Retain last known scores when a round reopens.
+    // Without a fresh verified table, retain the last known scores on reopening.
+    if (item.state !== 'closed' && item.points === undefined) continue;
     const expected = Object.values(config.managerIds);
     check(item.points && Object.keys(item.points).length === expected.length &&
       expected.every(id => Number.isSafeInteger(item.points[id])), 'Faltan puntuaciones válidas.');
