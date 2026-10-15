@@ -1,6 +1,6 @@
 # Mister Fantasy JK · 2026-27
 
-Panel estático para diez participantes. Jornadas 1–4 cargadas desde las capturas de Mister; jornadas 5–38 pendientes (`null` significa pendiente; `0` es una puntuación real). Jimmy se ha retirado y se ha eliminado la competición de invierno.
+Panel estático para diez participantes. Los puntos se actualizan desde Mister (`null` significa sin datos; `0` es una puntuación real). Las jornadas empezadas se muestran con puntos provisionales hasta su cierre. Jimmy se ha retirado y se ha eliminado la competición de invierno.
 
 ## Reglas y bote
 
@@ -24,9 +24,9 @@ También se puede abrir `index.html` con doble clic y seleccionar `mister-datos.
 
 El importador de Node.js y Playwright lee la liga **Juan hacker** y prepara los puntos en una vista previa antes de publicarlos. El flujo de GitHub Actions puede ejecutarlo cada día y desplegar el JSON validado en GitHub Pages.
 
-**La sincronización está desactivada por defecto y aún requiere una prueba autenticada.** No hay contraseñas ni sesiones en el repositorio. La sesión se crea en un navegador independiente, se guarda en una carpeta privada excluida de Git y, después de verificarla, se puede subir como secreto de GitHub Actions.
+La sincronización diaria de este repositorio está activa. En una instalación nueva, permanece desactivada hasta configurar y verificar la sesión. No hay contraseñas ni sesiones en el repositorio. La sesión se crea en un navegador independiente, se guarda en una carpeta privada excluida de Git y, después de verificarla, se puede subir como secreto de GitHub Actions.
 
-Sigue [SETUP.md](SETUP.md) para iniciar sesión, revisar una jornada, probar el proceso completo y activar la programación. La web muestra la fecha de la última sincronización. Las jornadas reabiertas o con partidos aplazados mantienen sus puntos anteriores y sus sprints quedan provisionales.
+Sigue [SETUP.md](SETUP.md) para iniciar sesión, revisar una jornada, probar el proceso completo y activar la programación. La web muestra la fecha de la última sincronización. Las jornadas empezadas, reabiertas o con partidos aplazados actualizan sus puntos cuando la tabla coincide con el historial de los diez participantes. Se marcan con un asterisco y sus sprints siguen provisionales hasta el cierre. Las jornadas futuras siguen vacías. La vista previa detalla el estado de cada jornada.
 
 ```sh
 npm ci

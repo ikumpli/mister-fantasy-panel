@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import path from 'node:path';
-import { BASE_URL, SyncError, check, readJson, roundLinks, standingsRows, validateHistory, roundState } from './sync-core.mjs';
+import { BASE_URL, SyncError, check, readJson, roundLinks, standingsRows, validateHistory, roundState, roundHasScores } from './sync-core.mjs';
 
 export const SESSION_FILE = 'playwright/.auth/mister.json';
 export function getSessionFile(env = process.env) {
@@ -126,7 +126,7 @@ export async function collectRounds(page, config, requestedRound) {
   for (const round of selected) {
     const metadata = await api(page, '/ajax/sw/gameweek', { post: 'gameweek', id: round.id, comments: '0' });
     const state = roundState(metadata, config);
-    if (state === 'pending') {
+    if (!roundHasScores(metadata, config)) {
       rounds.push({ ...round, state });
       continue;
     }

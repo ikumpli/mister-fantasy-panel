@@ -29,7 +29,9 @@ async function main() {
     const summary = [
       '# Vista previa Mister', '',
       `${rounds.length} jornadas comprobadas; ${changes.length} puntuaciones nuevas o corregidas.`,
-      'Las jornadas abiertas o con partidos pendientes conservan sus datos anteriores.', '',
+      'Las jornadas empezadas incluyen puntos provisionales, contrastados con el historial. Los sprints no se cierran hasta que terminen todos sus partidos.', '',
+      '| Jornada | Estado | Puntos comprobados |', '|---|---|---|',
+      ...rounds.map(r => `| J${r.round} | ${r.state === 'closed' ? 'Cerrada' : r.points ? 'Provisional' : 'Pendiente'} | ${r.points ? 'Sí' : 'No; se conservan los anteriores'} |`), '',
       '| Participante | Jornada | Antes | Mister |', '|---|---|---|---|',
       ...changes.map(c => `| ${c.player} | J${c.round} | ${c.before ?? 'Pendiente'} | ${c.after} |`), '',
       'El panel original no se ha modificado. La publicación requiere un paso separado.', ''

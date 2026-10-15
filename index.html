@@ -142,6 +142,7 @@
             <h3 style="margin:0">Puntos por jornada</h3>
             <div class="muted">Jornadas con datos: <span id="filledCount">0</span></div>
           </div>
+          <p id="provisionalRounds" class="note" hidden></p>
           <div id="tableWrap" style="overflow:auto; border:1px solid var(--line); border-radius:12px; margin-top:8px; max-height: 60vh;"></div>
 <div class="card" style="margin-top:12px;">
   <h3 style="margin:0 0 6px;">Evolución acumulada por jornada</h3>
@@ -353,10 +354,17 @@
       els.kpiTemporada.textContent = seasonJ;
       els.filledCount.textContent = count;
 
+      const provisional = Array.from({length:seasonJ}, (_,j)=>j+1).filter(j=>
+        data.sync?.rounds?.[j]?.status === 'pending' && players.some(p=>hasPoint(points[p.id]?.[j-1])));
+      const provisionalNote = $('#provisionalRounds');
+      provisionalNote.hidden = provisional.length === 0;
+      provisionalNote.textContent = provisional.length
+        ? `Puntos provisionales: ${provisional.map(j=>'J'+j).join(', ')} (*). Se incluyen en los totales y pueden cambiar. El sprint seguirá en curso hasta el cierre de todas sus jornadas.` : '';
+
 
       // Tabla jornadas
       let html = '<table><thead><tr><th>Jugador</th>';
-      for(let i=0;i<seasonJ;i++){ html += `<th class="right">J${i+1}</th>`; }
+      for(let i=0;i<seasonJ;i++){ html += `<th class="right">J${i+1}${provisional.includes(i+1)?' *':''}</th>`; }
       html += `<th class="right">Total</th></tr></thead><tbody>`;
       const totals = {};
       players.forEach(p => {
@@ -376,22 +384,23 @@
       const series = cumulativeSeries(points, players, seasonJ);
       const canvas = document.getElementById('cumChart');
       const filledAll = computeFilledAll(points, players, seasonJ, data.sync?.rounds);
+      const chartRounds = computeFilledAll(points, players, seasonJ);
       if (canvas){
-        if(filledAll <= 0){
+        if(chartRounds <= 0){
           const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
           const msg = 'Esperando la primera jornada completa.';
           canvas.width = canvas.parentElement.clientWidth || canvas.width;
           ctx.fillStyle = '#9aa4b2'; ctx.font = '14px Inter, ui-sans-serif'; ctx.fillText(msg, 16, 24);
         }else{
-          drawCumChart(canvas, players, series, filledAll);
+          drawCumChart(canvas, players, series, chartRounds);
           // redraw on resize
           let ro;
           if('ResizeObserver' in window){
-            ro = new ResizeObserver(()=>drawCumChart(canvas, players, series, filledAll));
+            ro = new ResizeObserver(()=>drawCumChart(canvas, players, series, chartRounds));
             ro.observe(canvas.parentElement);
             window.__chartObserver = ro;
           }else{
-            window.addEventListener('resize', ()=>drawCumChart(canvas, players, series, filledAll));
+            window.addEventListener('resize', ()=>drawCumChart(canvas, players, series, chartRounds));
           }
         }
       }
