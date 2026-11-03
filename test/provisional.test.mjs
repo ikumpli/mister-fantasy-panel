@@ -78,7 +78,7 @@ test('collector cross-checks provisional standings against all ten histories', a
   assert.ok(!untouched.visited.some(url=>url.endsWith('standings?gw=4047')));
 });
 
-test('imports a disqualified manager as zero only when the exact-round history confirms it', async () => {
+test('preserves displayed negative penalties when the labelled manager has zero in the exact-round history', async () => {
   // Observed J11 failure: standings displayed -4 with this explicit notice,
   // but Alan's userGameWeeks[4052].points was 0. Ordinary negatives remain valid.
   const id = config.managerIds.Al;
@@ -87,14 +87,23 @@ test('imports a disqualified manager as zero only when the exact-round history c
   const notices = { [id]: 'Saldo negativo, no puntúa' };
   for (const meta of [metadata(), {...metadata(), gameweekStatus:'closed', games:metadata().games.map(g=>({...g,status:'played'}))}]) {
     const result = await collectRounds(browserFixture(meta, false, {table, history, notices}).page, config, 6);
-    assert.equal(result[0].points[id], 0);
+    assert.equal(result[0].points[id], -4);
     assert.equal(result[0].points[config.managerIds.Eg], -4);
     const merged = mergeRounds(panel, config, result);
-    assert.equal(merged.output.points.Al[5], 0);
+    assert.equal(merged.output.points.Al[5], -4);
     assert.equal(merged.output.points.Eg[5], -4);
-    // Neither an arbitrary table/history mismatch nor a notice by itself is enough.
+    // Arbitrary mismatches, missing histories, and positive/zero table overrides
+    // cannot use the exception. Matching negative histories remain valid too.
     await assert.rejects(collectRounds(browserFixture(meta, false, {table, history}).page, config, 6), /no coinciden/);
-    await assert.rejects(collectRounds(browserFixture(meta, false, {table, notices}).page, config, 6), /no coinciden/);
+    for (const value of [1, -8, undefined]) {
+      await assert.rejects(collectRounds(browserFixture(meta, false, {table, history:{...history,[id]:value}, notices}).page, config, 6), /no coinciden/);
+    }
+    for (const value of [0, 4]) {
+      await assert.rejects(collectRounds(browserFixture(meta, false, {table:{...table,[id]:value}, history:{...history,[id]:-4}, notices}).page, config, 6), /no coinciden/);
+    }
+    await assert.rejects(collectRounds(browserFixture(meta, false, {table:{...table,[id]:4}, history, notices}).page, config, 6), /no coinciden/);
+    const matching = await collectRounds(browserFixture(meta, false, {table, notices}).page, config, 6);
+    assert.equal(matching[0].points[id], -4);
   }
 });
 
