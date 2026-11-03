@@ -54,7 +54,12 @@ export function roundLinks(links, config) {
 }
 
 export function standingsRows(links, config) {
+  return standingsSnapshot(links, config).points;
+}
+
+export function standingsSnapshot(links, config) {
   const rows = new Map();
+  const negativeBalanceManagers = new Set();
   for (const link of links) {
     const url = new URL(link.href, BASE_URL);
     const match = url.pathname.match(/^\/users\/(\d+)(?:\/|$)/);
@@ -63,17 +68,17 @@ export function standingsRows(links, config) {
     check(points.length === 1, 'Una fila tiene una puntuación ausente o ambigua.');
     const value = Number(points[0][1].replaceAll('.', ''));
     check(Number.isSafeInteger(value) && !rows.has(match[1]), 'Puntos inválidos o participante duplicado.');
-    // A disqualified manager can still show a raw lineup total (J11 showed -4),
-    // while the exact-round history correctly awards zero. Mister explicitly
-    // labels this case; ordinary negative scores must retain their actual value.
-    // collectRounds still requires the history to independently confirm zero.
-    const noScore = /(?:^|\s)Saldo negativo,\s*no puntúa(?:\s|$)/iu.test(link.text.normalize('NFC'));
-    rows.set(match[1], noScore ? 0 : value);
+    // Retain the displayed score, including negative penalties. The notice is
+    // separate evidence for the known zero-history discrepancy, not a score.
+    if (/(?:^|\s)Saldo negativo,\s*no puntúa(?:\s|$)/iu.test(link.text.normalize('NFC'))) {
+      negativeBalanceManagers.add(match[1]);
+    }
+    rows.set(match[1], value);
   }
   const expected = Object.values(config.managerIds);
   check(rows.size === expected.length && expected.every(id => rows.has(id)),
     'La clasificación no contiene exactamente los diez participantes de Juan hacker.');
-  return Object.fromEntries(rows);
+  return { points: Object.fromEntries(rows), negativeBalanceManagers };
 }
 
 export function validateHistory(data, config) {

@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import path from 'node:path';
-import { BASE_URL, SyncError, check, readJson, roundLinks, standingsRows, validateHistory, roundState, roundHasScores, roundProgress } from './sync-core.mjs';
+import { BASE_URL, SyncError, check, readJson, roundLinks, standingsSnapshot, validateHistory, roundState, roundHasScores, roundProgress } from './sync-core.mjs';
 
 export const SESSION_FILE = 'playwright/.auth/mister.json';
 export function getSessionFile(env = process.env) {
@@ -79,7 +79,7 @@ export async function openStandings(page, config, roundId) {
   const links = await page.locator('a[href^="users/"], a[href*="/users/"]').evaluateAll(nodes => nodes
     .filter(node => node.getClientRects().length > 0)
     .map(node => ({ href: node.href, text: node.innerText.replace(/\s+/g, ' ').trim() })));
-  return standingsRows(links, config);
+  return standingsSnapshot(links, config);
 }
 
 export async function selectLeague(page, config) {
@@ -131,12 +131,17 @@ export async function collectRounds(page, config, requestedRound) {
       rounds.push({ ...round, state, progress });
       continue;
     }
-    const points = await openStandings(page, config, round.id);
+    const { points, negativeBalanceManagers } = await openStandings(page, config, round.id);
     for (const id of Object.values(config.managerIds)) {
       const history = histories[id][round.id];
       const value = typeof history?.points === 'string' && /^-?\d+$/.test(history.points)
         ? Number(history.points) : history?.points;
-      check(String(history?.id_gameweek) === round.id && Number.isSafeInteger(value) && value === points[id],
+      // The panel follows the displayed standings. Mister's history can report
+      // zero for a negative-balance manager even when the table shows a negative
+      // penalty (observed J11: -4). Accept only that explicitly labelled case.
+      const negativeBalanceDifference = negativeBalanceManagers.has(id) && value === 0 && points[id] < 0;
+      check(String(history?.id_gameweek) === round.id && Number.isSafeInteger(value) &&
+        (value === points[id] || negativeBalanceDifference),
         `J${round.round}: la tabla y el historial no coinciden. Reintenta cuando termine la actualización de Mister.`);
     }
     rounds.push({ ...round, state, points, progress });
