@@ -46,11 +46,11 @@ test('replaces provisional scores, preserves zero/negative values and settles on
 });
 
 // Exercise the complete collector with browser-boundary responses; no account/session is needed.
-function browserFixture(meta, mismatch = false) {
+function browserFixture(meta, mismatch = false, { table = scores, history = table, notices = {} } = {}) {
   let url;
   const visited = [];
   const roundLinks = [1,4,6].map(round=>({text:`J${round}`, href:`/standings?gw=${round===6?'4047':config.seasonAnchors[round]}`}));
-  const rows = Object.entries(scores).map(([id,p])=>({href:`/users/${id}/name`,text:`Name ${p} PTS`}));
+  const rows = Object.entries(table).map(([id,p])=>({href:`/users/${id}/name`,text:`Name ${notices[id] || ''} ${p} PTS`}));
   return {visited, page:{
     async goto(next) {url=next; visited.push(next);return {ok:()=>true};},
     url:()=>url,
@@ -61,7 +61,7 @@ function browserFixture(meta, mismatch = false) {
     async evaluate(_fn, args) {
       if(args.endpoint==='/ajax/sw/gameweek') return {data:meta};
       const id=args.form.id;
-      return {data:{userInfo:{id_community:config.leagueId}, userGameWeeks:{4047:{id_gameweek:'4047',points:String(scores[id]+(mismatch?1:0))}}}};
+      return {data:{userInfo:{id_community:config.leagueId}, userGameWeeks:{4047:{id_gameweek:'4047',points:String(history[id]+(mismatch?1:0))}}}};
     }
   }};
 }
@@ -76,6 +76,26 @@ test('collector cross-checks provisional standings against all ten histories', a
   const untouched = browserFixture(future);
   assert.deepEqual(await collectRounds(untouched.page,config,6), [{round:6,id:'4047',state:'pending',progress:roundProgress(future)}]);
   assert.ok(!untouched.visited.some(url=>url.endsWith('standings?gw=4047')));
+});
+
+test('imports a disqualified manager as zero only when the exact-round history confirms it', async () => {
+  // Observed J11 failure: standings displayed -4 with this explicit notice,
+  // but Alan's userGameWeeks[4052].points was 0. Ordinary negatives remain valid.
+  const id = config.managerIds.Al;
+  const table = { ...scores, [id]: -4 };
+  const history = { ...scores, [id]: 0 };
+  const notices = { [id]: 'Saldo negativo, no puntúa' };
+  for (const meta of [metadata(), {...metadata(), gameweekStatus:'closed', games:metadata().games.map(g=>({...g,status:'played'}))}]) {
+    const result = await collectRounds(browserFixture(meta, false, {table, history, notices}).page, config, 6);
+    assert.equal(result[0].points[id], 0);
+    assert.equal(result[0].points[config.managerIds.Eg], -4);
+    const merged = mergeRounds(panel, config, result);
+    assert.equal(merged.output.points.Al[5], 0);
+    assert.equal(merged.output.points.Eg[5], -4);
+    // Neither an arbitrary table/history mismatch nor a notice by itself is enough.
+    await assert.rejects(collectRounds(browserFixture(meta, false, {table, history}).page, config, 6), /no coinciden/);
+    await assert.rejects(collectRounds(browserFixture(meta, false, {table, notices}).page, config, 6), /no coinciden/);
+  }
 });
 
 test('preview diagnostics contain only recognized statuses and match counts', () => {
