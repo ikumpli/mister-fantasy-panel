@@ -345,7 +345,7 @@
       6,
       20,
       14,
-      0,
+      -4,
       null,
       null,
       null,
@@ -457,7 +457,7 @@
   },
   "sync": {
     "source": "Mister Fantasy",
-    "lastSuccessfulSync": "2026-11-03T09:30:14.429Z",
+    "lastSuccessfulSync": "2026-11-03T09:51:46.875Z",
     "rounds": {
       "1": {
         "gameweekId": "3968",
