@@ -137,7 +137,8 @@ export async function collectRounds(page, config, requestedRound) {
       const value = typeof history?.points === 'string' && /^-?\d+$/.test(history.points)
         ? Number(history.points) : history?.points;
       check(String(history?.id_gameweek) === round.id && Number.isSafeInteger(value) && value === points[id],
-        `J${round.round}: la tabla y el historial no coinciden. Reintenta cuando termine la actualización de Mister.`);
+        `J${round.round}: la tabla y el historial no coinciden. Reintenta cuando termine la actualización de Mister. ` +
+        `Diagnóstico: ${JSON.stringify({ managerId: id, historyPresent: !!history, gameweekMatches: String(history?.id_gameweek) === round.id, historyPoints: Number.isSafeInteger(value) ? value : null, standingsPoints: points[id] })}`);
     }
     rounds.push({ ...round, state, points, progress });
   }
