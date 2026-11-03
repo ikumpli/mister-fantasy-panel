@@ -121,6 +121,11 @@ export async function collectRounds(page, config, requestedRound) {
   for (const id of Object.values(config.managerIds)) {
     const data = await api(page, '/ajax/sw/users', { post: 'users', id, comments: '0' });
     histories[id] = validateHistory(data, config);
+    if (id === config.managerIds.Al) {
+      const safeKeys = value => Object.keys(value ?? {}).filter(key => /^[a-z_]+$/i.test(key) && !/(token|auth|cookie|session)/i.test(key));
+      console.log('Score schema:', JSON.stringify(Object.fromEntries(safeKeys(data).map(key =>
+        [key, typeof data[key] === 'object' ? safeKeys(data[key]) : typeof data[key]]))));
+    }
   }
   const rounds = [];
   for (const round of selected) {
