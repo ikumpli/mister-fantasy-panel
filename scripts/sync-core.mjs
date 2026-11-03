@@ -63,7 +63,12 @@ export function standingsRows(links, config) {
     check(points.length === 1, 'Una fila tiene una puntuación ausente o ambigua.');
     const value = Number(points[0][1].replaceAll('.', ''));
     check(Number.isSafeInteger(value) && !rows.has(match[1]), 'Puntos inválidos o participante duplicado.');
-    rows.set(match[1], value);
+    // A disqualified manager can still show a raw lineup total (J11 showed -4),
+    // while the exact-round history correctly awards zero. Mister explicitly
+    // labels this case; ordinary negative scores must retain their actual value.
+    // collectRounds still requires the history to independently confirm zero.
+    const noScore = /(?:^|\s)Saldo negativo,\s*no puntúa(?:\s|$)/iu.test(link.text.normalize('NFC'));
+    rows.set(match[1], noScore ? 0 : value);
   }
   const expected = Object.values(config.managerIds);
   check(rows.size === expected.length && expected.every(id => rows.has(id)),
