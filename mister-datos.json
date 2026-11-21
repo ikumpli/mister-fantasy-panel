@@ -67,7 +67,7 @@
       22,
       51,
       26,
-      null,
+      2,
       null,
       null,
       null,
@@ -107,7 +107,7 @@
       42,
       50,
       52,
-      null,
+      6,
       null,
       null,
       null,
@@ -147,7 +147,7 @@
       48,
       49,
       22,
-      null,
+      18,
       null,
       null,
       null,
@@ -187,7 +187,7 @@
       28,
       54,
       57,
-      null,
+      12,
       null,
       null,
       null,
@@ -227,7 +227,7 @@
       45,
       80,
       51,
-      null,
+      2,
       null,
       null,
       null,
@@ -267,7 +267,7 @@
       24,
       27,
       21,
-      null,
+      -12,
       null,
       null,
       null,
@@ -307,7 +307,7 @@
       28,
       48,
       27,
-      null,
+      15,
       null,
       null,
       null,
@@ -347,7 +347,7 @@
       14,
       0,
       10,
-      null,
+      0,
       null,
       null,
       null,
@@ -387,7 +387,7 @@
       51,
       42,
       36,
-      null,
+      17,
       null,
       null,
       null,
@@ -427,7 +427,7 @@
       35,
       30,
       28,
-      null,
+      4,
       null,
       null,
       null,
@@ -457,7 +457,7 @@
   },
   "sync": {
     "source": "Mister Fantasy",
-    "lastSuccessfulSync": "2026-11-20T16:56:30.356Z",
+    "lastSuccessfulSync": "2026-11-21T16:07:48.803Z",
     "rounds": {
       "1": {
         "gameweekId": "3968",
@@ -506,6 +506,10 @@
       "12": {
         "gameweekId": "4053",
         "status": "closed"
+      },
+      "13": {
+        "gameweekId": "4054",
+        "status": "pending"
       }
     }
   }
